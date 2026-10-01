@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JUDGEX | Next-Generation Online Coding Judge & Compiler Architecture</title>
+  <meta name="description" content="A cinematic, Apple-level online coding judge platform. High-performance sandboxed compilation, multi-language execution, sub-millisecond evaluation, and competitive programming arena.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body class="bg-dark text-slate-100 antialiased selection-brand">
+
+  <!-- Preloader Screen with Engineering Ring Counter -->
+  <div id="preloader" class="preloader">
+    <div class="preloader-content">
+      <div class="brand-monogram">
+        <span class="brand-logo-text">JUDGE<span class="text-cyan">X</span></span>
+        <span class="engine-badge-mini">CORE ARCHITECTURE v4.2</span>
+      </div>
+      <div class="progress-ring-container">
+        <svg class="progress-ring" width="120" height="120" viewBox="0 0 120 120">
+          <circle class="progress-ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="progress-ring-circle" id="progress-circle" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="progress-text">
+          <span id="load-percent">0</span><span class="percent-symbol">%</span>
+        </div>
+      </div>
+      <div class="loading-status-text" id="loading-status">DECONSTRUCTING COMPILER HARDWARE</div>
+      <div class="loading-substatus" id="loading-substatus">Caching 240 high-precision cinematic rendering frames...</div>
+    </div>
+  </div>
+
+  <!-- Primary Sticky Global Navigation -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner container-fluid">
+      <div class="header-left">
+        <a href="#hero" class="brand-mark" aria-label="JudgeX Home">
+          <div class="logo-symbol">
+            <span class="symbol-bracket">&lt;</span>
+            <span class="symbol-slash">/</span>
+            <span class="symbol-bracket">&gt;</span>
+          </div>
+          <span class="brand-name">JUDGE<span class="text-cyan">X</span></span>
+        </a>
+        <div class="engine-pill">
+          <span class="pill-dot"></span>
+          <span class="pill-name">SANDBOX ENGINE</span>
+          <span class="pill-badge">0.008s TLE CAP</span>
+        </div>
+      </div>
+
+      <nav class="nav-links desktop-only" id="main-nav">
+        <a href="#hero" class="nav-item active">Overview</a>
+        <a href="#languages-grid" class="nav-item">Runtimes</a>
+        <a href="#judge-engine" class="nav-item">Judge Architecture</a>
+        <a href="/login.html?view=ide" class="nav-item">Live IDE</a>
+        <a href="#arena-section" class="nav-item">Arena & Contests</a>
+      </nav>
+
+      <div class="header-right">
+        <a href="/login.html" class="nav-item auth-nav-link" title="Student Portal Sign In">Student Login</a>
+        <a href="/login.html?role=admin" class="nav-item auth-nav-link text-red" title="Administrator Control Console">Admin</a>
+
+        <a href="/login.html?view=ide" id="quick-run-btn" class="ide-toggle-pill" title="Open Interactive Judge IDE Sandbox" aria-label="Open Code Editor">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span class="pill-label">LIVE SANDBOX</span>
+        </a>
+
+        <a href="/login.html" class="btn-primary-glow" id="nav-start-btn">
+          <span class="btn-text">Portal Access</span>
+          <span class="btn-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+    <!-- Hero Header Intro Section (Clean, placed above the 3D animation) -->
+    <section class="hero-intro-section" id="hero">
+      <div class="container text-center">
+        <span class="section-tag">THE NEXT-GENERATION CODING ENVIRONMENT</span>
+        <h1 class="hero-main-title">Code. Compile. Conquer.</h1>
+        <p class="hero-main-desc">One platform. Every challenge. Infinite possibilities. Scroll to explore the deconstructed hardware and compiler architecture.</p>
+        <div class="hero-stats-row">
+          <div class="stat-item">
+            <span class="stat-val">&lt;12<span class="stat-unit">ms</span></span>
+            <span class="stat-lbl">Median Verdict Time</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val">30<span class="stat-unit">+</span></span>
+            <span class="stat-lbl">Compiler Runtimes</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val">99.99<span class="stat-unit">%</span></span>
+            <span class="stat-lbl">Sandbox Isolation</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scrolly Track (100% Clean Animated Screen - No text, no HUD, no overlays) -->
+    <section class="scrolly-track" id="scrolly-section">
+      <div class="sticky-viewport" id="sticky-viewport">
+        <!-- Canvas Layer for 240-Frame 3D Explosion Sequence -->
+        <div class="canvas-wrapper">
+          <canvas id="sequence-canvas" class="sequence-canvas"></canvas>
+          <div class="canvas-vignette-overlay"></div>
+          <div class="canvas-ambient-glow"></div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- SECTION: Supported Languages & Runtimes Grid -->
+    <section class="section-container" id="languages-grid">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">COMPILER ECOSYSTEM</div>
+          <h2 class="section-headline">Native High-Performance Runtimes</h2>
+          <p class="section-subtitle">
+            Pre-compiled standard templates, ultra-low overhead containers, and strict memory fences for every major programming language.
+          </p>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Bento 1: C++20 -->
+          <div class="bento-card">
+            <div class="bento-badge">SYSTEMS & SPEED</div>
+            <div class="bento-lang-icon text-cyan">C++</div>
+            <h3 class="bento-title">C++20 (GCC 13.2)</h3>
+            <p class="bento-desc">
+              Full ISO C++20 standard with Concepts, Ranges, and <code>std::format</code>. Compiled with <code>-O3 -march=native</code> for maximum memory throughput and micro-second vectorization.
+            </p>
+            <div class="stat-highlight">
+              <span class="stat-number">0.002s</span>
+              <span class="stat-label">Average Runtime Execution</span>
+            </div>
+          </div>
+
+          <!-- Bento 2: Python 3.14 -->
+          <div class="bento-card">
+            <div class="bento-badge">DYNAMIC SCRIPTING</div>
+            <div class="bento-lang-icon text-blue">PY</div>
+            <h3 class="bento-title">Python 3.14 + PyPy</h3>
+            <p class="bento-desc">
+              Next-generation JIT acceleration, optimized C-bindings for NumPy, and free-threaded interpreter support for data structures and algorithmic mastery.
+            </p>
+            <div class="stat-highlight">
+              <span class="stat-number">4.2x</span>
+              <span class="stat-label">Speedup via Adaptive JIT</span>
+            </div>
+          </div>
+
+          <!-- Bento 3: Java 21 LTS -->
+          <div class="bento-card">
+            <div class="bento-badge">ENTERPRISE CONCURRENCY</div>
+            <div class="bento-lang-icon text-gold">JAVA</div>
+            <h3 class="bento-title">Java 21 LTS (OpenJDK)</h3>
+            <p class="bento-desc">
+              Leveraging Virtual Threads (Project Loom), Record Patterns, and the Z Garbage Collector (ZGC) for sub-millisecond GC pause times in large dataset graphs.
+            </p>
+            <div class="stat-highlight">
+              <span class="stat-number">&lt;1ms</span>
+              <span class="stat-label">Garbage Collection Pause</span>
+            </div>
+          </div>
+
+          <!-- Bento 4: JavaScript & TypeScript -->
+          <div class="bento-card">
+            <div class="bento-badge">WEB ENGINES</div>
+            <div class="bento-lang-icon text-cyan">JS/TS</div>
+            <h3 class="bento-title">Node.js 22 & TypeScript 5</h3>
+            <p class="bento-desc">
+              V8 Engine with WebAssembly SIMD support. Instant transpilation pipeline with strict memory limit controls for full-stack algorithmic problem solving.
+            </p>
+            <div class="stat-highlight">
+              <span class="stat-number">12ms</span>
+              <span class="stat-label">Cold-Start Container Spinup</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Competitive Programming Arena & Leaderboard -->
+    <section class="section-container" id="arena-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">GLOBAL COMPETITIVE ARENA</div>
+          <h2 class="section-headline">Rankings, Contests & Live Telemetry</h2>
+          <p class="section-subtitle">
+            Battle head-to-head in real-time rating contests, climb global leaderboards, and analyze submission metrics with precision telemetry.
+          </p>
+        </div>
+
+        <div class="arena-grid">
+          <!-- Left: Live Contests Card -->
+          <div class="arena-card">
+            <div class="arena-card-header">
+              <span class="arena-card-tag">UPCOMING CONTEST</span>
+              <span class="live-pulse-dot"></span>
+            </div>
+            <h3 class="arena-title">Weekly Bi-Wizard Grand Contest #148</h3>
+            <p class="arena-desc">4 Algorithmic Challenges • 90 Minutes • Global ELO Rating at stake.</p>
+            
+            <div class="contest-timer-box">
+              <div class="time-block">
+                <span class="t-val" id="time-hours">02</span>
+                <span class="t-lbl">HOURS</span>
+              </div>
+              <span class="t-colon">:</span>
+              <div class="time-block">
+                <span class="t-val" id="time-mins">44</span>
+                <span class="t-lbl">MINUTES</span>
+              </div>
+              <span class="t-colon">:</span>
+              <div class="time-block">
+                <span class="t-val" id="time-secs">19</span>
+                <span class="t-lbl">SECONDS</span>
+              </div>
+            </div>
+
+            <button class="btn-primary-large full-width" onclick="alert('Registered for Weekly Grand Contest #148! Good luck.');">
+              <span>Register for Contest</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+
+          <!-- Right: Leaderboard Preview -->
+          <div class="arena-card">
+            <div class="arena-card-header">
+              <span class="arena-card-tag">GLOBAL LEADERBOARD (TOP CODERS)</span>
+              <span class="text-cyan font-mono">SEASON 4</span>
+            </div>
+            
+            <div class="leaderboard-table">
+              <div class="lb-row lb-header">
+                <span>RANK</span>
+                <span>HANDLE</span>
+                <span>RATING</span>
+                <span>SOLVED</span>
+              </div>
+              <div class="lb-row lb-gold">
+                <span class="lb-rank">#1 👑</span>
+                <span class="lb-user">tourist_algo</span>
+                <span class="lb-rating">3842</span>
+                <span class="lb-solved">1,489</span>
+              </div>
+              <div class="lb-row">
+                <span class="lb-rank">#2 🥈</span>
+                <span class="lb-user">radewoosh</span>
+                <span class="lb-rating">3610</span>
+                <span class="lb-solved">1,340</span>
+              </div>
+              <div class="lb-row">
+                <span class="lb-rank">#3 🥉</span>
+                <span class="lb-user">neal_wu</span>
+                <span class="lb-rating">3524</span>
+                <span class="lb-solved">1,290</span>
+              </div>
+              <div class="lb-row">
+                <span class="lb-rank">#4</span>
+                <span class="lb-user">ecnerwala</span>
+                <span class="lb-rating">3490</span>
+                <span class="lb-solved">1,215</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand-mark mb-3">
+            <div class="logo-symbol">
+              <span class="symbol-bracket">&lt;</span>
+              <span class="symbol-slash">/</span>
+              <span class="symbol-bracket">&gt;</span>
+            </div>
+            <span class="brand-name">JUDGE<span class="text-cyan">X</span></span>
+          </div>
+          <p class="footer-tagline">The world's highest performance online judge & competitive programming platform.</p>
+        </div>
+        <div class="footer-links-grid">
+          <div class="footer-col">
+            <h5>Platform</h5>
+            <a href="#hero">Overview</a>
+            <a href="/login.html?view=ide">Live Sandbox</a>
+            <a href="#arena-section">Contest Arena</a>
+          </div>
+          <div class="footer-col">
+            <h5>Compilers</h5>
+            <a href="#languages-grid">C++20 (GCC)</a>
+            <a href="#languages-grid">Python 3.14</a>
+            <a href="#languages-grid">Java 21 LTS</a>
+            <a href="#languages-grid">Node.js 22</a>
+          </div>
+          <div class="footer-col">
+            <h5>Resources</h5>
+            <a href="#">Problem Set (1,200+)</a>
+            <a href="#">API Documentation</a>
+            <a href="#">Verdict Reference</a>
+            <a href="#">System Architecture</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© 2026 JUDGEX Core Systems Inc. All rights reserved. Sandboxed execution powered by isolated Linux containers.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Protocol</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Security Audit</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/app.js?v=8"></script>
+</body>
+</html>

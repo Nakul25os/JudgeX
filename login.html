@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JUDGEX | Authentication Portal — Student & Admin Access</title>
+  <meta name="description" content="Secure role-based authentication portal for the JudgeX Online Coding Judge Platform. Student workspace and Administrator control console.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=7">
+  <link rel="stylesheet" href="/login.css?v=3">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+  <!-- Official Google Identity Services SDK for Real Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="login-body antialiased">
+
+  <!-- Ambient Cybernetic Glows -->
+  <div class="auth-ambient-glow" id="auth-glow"></div>
+  <div class="auth-ambient-grid"></div>
+
+  <!-- Minimal Top Header -->
+  <header class="auth-header">
+    <div class="container auth-header-inner">
+      <a href="/" class="brand-mark" aria-label="Return to JudgeX Home">
+        <div class="logo-symbol">
+          <span class="symbol-bracket">&lt;</span>
+          <span class="symbol-slash">/</span>
+          <span class="symbol-bracket">&gt;</span>
+        </div>
+        <span class="brand-name">JUDGE<span class="text-cyan">X</span></span>
+      </a>
+
+      <div class="auth-header-right">
+        <div class="server-status-pill">
+          <span class="status-pulse-dot"></span>
+          <span class="status-text">AUTH GATEWAY // 256-BIT TLS</span>
+        </div>
+        <a href="/" class="btn-back-home">
+          <span>← Back to Platform</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Login Card Stage -->
+  <main class="auth-main-container">
+    <div class="auth-card-wrapper" id="auth-card-wrapper">
+      
+      <!-- Role Switcher Tabs -->
+      <div class="auth-role-tabs">
+        <button class="role-tab active" id="tab-student" data-role="student">
+          <span class="tab-icon">👨‍💻</span>
+          <span class="tab-label">Student Portal</span>
+        </button>
+        <button class="role-tab" id="tab-admin" data-role="admin">
+          <span class="tab-icon">🛡️</span>
+          <span class="tab-label">Admin Console</span>
+        </button>
+        <button class="role-tab" id="tab-ide" data-role="ide">
+          <span class="tab-icon">⚡</span>
+          <span class="tab-label">Sandbox IDE</span>
+        </button>
+      </div>
+
+      <!-- AUTH CARD: Student Login & Registration -->
+      <div class="auth-card student-mode" id="student-card">
+        
+        <!-- Student Header -->
+        <div class="card-header text-center">
+          <span class="badge-role badge-student">STUDENT WORKSPACE</span>
+          <h1 class="auth-title" id="student-title">Welcome Back, Coder</h1>
+          <p class="auth-subtitle" id="student-sub">Sign in to resume submissions, track rankings, and compete in live contests.</p>
+        </div>
+
+        <!-- Mode Toggle: Sign In vs Register -->
+        <div class="auth-mode-switch">
+          <button class="mode-switch-btn active" id="btn-student-signin-mode">Sign In</button>
+          <button class="mode-switch-btn" id="btn-student-register-mode">Create Account</button>
+        </div>
+
+        <!-- Student Sign In Form -->
+        <form id="student-login-form" class="auth-form" onsubmit="event.preventDefault(); window.handleStudentLogin();">
+          
+          <!-- Real Google Auth Sign In -->
+          <div class="google-auth-container">
+            <button type="button" class="btn-google-auth" id="btn-google-student" onclick="window.initiateRealGoogleAuth('student')">
+              <svg class="google-svg" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+              </svg>
+              <span class="google-btn-text">Sign in with Google Account</span>
+              <span class="auth-sso-badge">REAL GOOGLE SSO</span>
+            </button>
+            <div class="google-config-meta">
+              <button type="button" class="btn-config-link" onclick="window.openGoogleConfigModal('student')">⚙️ Google OAuth Client ID Settings</button>
+            </div>
+          </div>
+
+          <div class="auth-divider">
+            <span class="auth-divider-line"></span>
+            <span class="auth-divider-text">OR CONTINUE WITH ROLL NO. / EMAIL</span>
+            <span class="auth-divider-line"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="student-email">University Roll No. (0863XXXXXXXX) or Email</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🎓</span>
+              <input type="text" id="student-email" required placeholder="0863CS221045 or alex@university.edu" autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="student-password">Password</label>
+              <a href="#" class="forgot-link" onclick="alert('Password reset link dispatched to registered university email.'); return false;">Forgot?</a>
+            </div>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="student-password" required placeholder="••••••••••••" autocomplete="current-password">
+              <button type="button" class="btn-toggle-eye" onclick="window.togglePasswordVisibility('student-password', this)">👁</button>
+            </div>
+          </div>
+
+          <div class="form-options-row">
+            <label class="remember-checkbox-label">
+              <input type="checkbox" id="student-remember" checked>
+              <span>Remember this session</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-auth-submit btn-student-theme" id="btn-student-submit">
+            <span class="btn-glow"></span>
+            <span>Sign In to Student Portal →</span>
+          </button>
+
+          <!-- Instant Guest IDE Sandbox Access -->
+          <div class="direct-sandbox-access-box">
+            <button type="button" class="btn-launch-sandbox-guest" onclick="window.switchRole('ide')">
+              <span class="sandbox-dot"></span>
+              <span>⚡ Practice Mode: Launch Interactive Coding Judge IDE (Guest Sandbox) →</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Student Registration Form (Hidden by default) -->
+        <form id="student-register-form" class="auth-form hidden" onsubmit="event.preventDefault(); window.handleStudentRegister();">
+          
+          <!-- Real Google Auth Register -->
+          <div class="google-auth-container">
+            <button type="button" class="btn-google-auth" onclick="window.initiateRealGoogleAuth('student')">
+              <svg class="google-svg" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+              </svg>
+              <span class="google-btn-text">Sign up with Google (Instant Sync)</span>
+              <span class="auth-sso-badge">REAL GOOGLE</span>
+            </button>
+          </div>
+
+          <div class="auth-divider">
+            <span class="auth-divider-line"></span>
+            <span class="auth-divider-text">OR REGISTER WITH ROLL NUMBER</span>
+            <span class="auth-divider-line"></span>
+          </div>
+
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label for="reg-name">Full Name</label>
+              <input type="text" id="reg-name" required placeholder="Alex Vance">
+            </div>
+            <div class="form-group">
+              <label for="reg-roll">University Roll No. (0863XXXXXXXX)</label>
+              <input type="text" id="reg-roll" required placeholder="0863CS221045" maxlength="12" pattern="0863[A-Za-z0-9]{8}" title="Must begin with 0863 followed by 8 characters (Format: 0863XXXXXXXX)">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-email">College / University Email</label>
+            <input type="email" id="reg-email" required placeholder="alex.vance@university.edu">
+          </div>
+
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label for="reg-dept">Department</label>
+              <select id="reg-dept" class="auth-select">
+                <option value="cse">Computer Science & Eng (CSE)</option>
+                <option value="it">Information Technology (IT)</option>
+                <option value="ece">Electronics & Comm (ECE)</option>
+                <option value="ds">AI & Data Science (AI/DS)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="reg-lang">Preferred Language</label>
+              <select id="reg-lang" class="auth-select">
+                <option value="cpp">C++20 (GCC)</option>
+                <option value="python">Python 3.14</option>
+                <option value="java">Java 21 LTS</option>
+                <option value="js">JavaScript (Node.js)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-password">Create Password</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="reg-password" required placeholder="Minimum 8 characters" autocomplete="new-password">
+              <button type="button" class="btn-toggle-eye" onclick="window.togglePasswordVisibility('reg-password', this)">👁</button>
+            </div>
+
+            <!-- Password Strength & Criteria Card (matching user design) -->
+            <div class="password-criteria-card" id="password-criteria-card">
+              <div class="pwd-card-header">
+                <div class="pwd-header-left">
+                  <span class="pwd-shield-icon">🛡️</span>
+                  <span class="pwd-header-title">Password Strength</span>
+                </div>
+                <span class="pwd-strength-label text-red" id="pwd-strength-label">Weak</span>
+              </div>
+              
+              <div class="pwd-strength-bar-bg">
+                <div class="pwd-strength-bar-fill strength-weak" id="pwd-strength-bar"></div>
+              </div>
+
+              <div class="pwd-requirements-header">Password Requirements:</div>
+              
+              <ul class="pwd-criteria-list" id="pwd-criteria-list">
+                <li class="pwd-criterion" id="crit-length">
+                  <span class="crit-bullet"></span>
+                  <span class="crit-text">Minimum 8 characters</span>
+                </li>
+                <li class="pwd-criterion" id="crit-upper">
+                  <span class="crit-bullet"></span>
+                  <span class="crit-text">At least one uppercase letter (A–Z)</span>
+                </li>
+                <li class="pwd-criterion" id="crit-lower">
+                  <span class="crit-bullet"></span>
+                  <span class="crit-text">At least one lowercase letter (a–z)</span>
+                </li>
+                <li class="pwd-criterion" id="crit-number">
+                  <span class="crit-bullet"></span>
+                  <span class="crit-text">At least one number (0–9)</span>
+                </li>
+                <li class="pwd-criterion" id="crit-symbol">
+                  <span class="crit-bullet"></span>
+                  <span class="crit-text">At least one symbol (@, #, $, !, %, etc.)</span>
+                </li>
+                <li class="pwd-criterion" id="crit-spaces">
+                  <span class="crit-bullet"></span>
+                  <span class="crit-text">No spaces allowed</span>
+                </li>
+                <li class="pwd-criterion" id="crit-common">
+                  <span class="crit-bullet"></span>
+                  <span class="crit-text">No common passwords (e.g. 12345678, password123)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-auth-submit btn-student-theme">
+            <span>Complete Registration & Open IDE →</span>
+          </button>
+        </form>
+
+      </div>
+
+      <!-- AUTH CARD: Admin Login (Elevated Privilege Console) -->
+      <div class="auth-card admin-mode hidden" id="admin-card">
+        
+        <!-- Admin Header -->
+        <div class="card-header text-center">
+          <span class="badge-role badge-admin">SECURITY LEVEL: ROOT // FACULTY GATEWAY</span>
+          <h1 class="auth-title">Judge Administrator Console</h1>
+          <p class="auth-subtitle">Restricted to authorized system evaluators, department faculty, and contest administrators.</p>
+        </div>
+
+        <form id="admin-login-form" class="auth-form" onsubmit="event.preventDefault(); window.handleAdminLogin();">
+          
+          <!-- Google Workspace Admin SSO -->
+          <div class="google-auth-container">
+            <button type="button" class="btn-google-auth btn-google-admin" id="btn-google-admin" onclick="window.initiateRealGoogleAuth('admin')">
+              <svg class="google-svg" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+              </svg>
+              <span class="google-btn-text">Sign in with Google Workspace</span>
+              <span class="auth-sso-badge admin-sso-badge">REAL SSO</span>
+            </button>
+            <div class="google-config-meta">
+              <button type="button" class="btn-config-link" onclick="window.openGoogleConfigModal('admin')">⚙️ Google Workspace OAuth Client ID</button>
+            </div>
+          </div>
+
+          <div class="auth-divider admin-divider">
+            <span class="auth-divider-line"></span>
+            <span class="auth-divider-text">OR AUTHENTICATE WITH FACULTY ID & 2FA</span>
+            <span class="auth-divider-line"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="admin-id">Faculty ID or Administrator Handle</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🛡️</span>
+              <input type="text" id="admin-id" required placeholder="admin.root@judge.internal" autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="admin-password">Master Security Passphrase</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="admin-password" required placeholder="••••••••••••••••" autocomplete="current-password">
+              <button type="button" class="btn-toggle-eye" onclick="window.togglePasswordVisibility('admin-password', this)">👁</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="admin-pin">2FA Security Token / Hardware PIN</label>
+              <span class="security-badge-subtle">TIME-SYNCED TOTP</span>
+            </div>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">📟</span>
+              <input type="text" id="admin-pin" required maxlength="6" placeholder="849201" pattern="[0-9]{6}">
+            </div>
+          </div>
+
+          <div class="form-options-row">
+            <label class="remember-checkbox-label">
+              <input type="checkbox" id="admin-mfa" checked>
+              <span>Enforce hardware sandbox telemetry</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-auth-submit btn-admin-theme" id="btn-admin-submit">
+            <span class="btn-glow"></span>
+            <span>Authenticate as Administrator ⚡</span>
+          </button>
+        </form>
+
+      </div>
+
+      <!-- POST-AUTH MODAL / DASHBOARD SIMULATION: Student Dashboard -->
+      <div class="dashboard-panel hidden" id="student-dashboard">
+        <div class="dash-header">
+          <div class="dash-user-info">
+            <div class="user-avatar student-avatar">AV</div>
+            <div>
+              <h2 class="dash-name" id="dash-student-name">Alex Vance</h2>
+              <span class="dash-role-tag text-cyan" id="dash-student-roll">STUDENT // ROLL: 0863CS221045</span>
+            </div>
+          </div>
+          <button class="btn-logout" onclick="window.handleLogout()">Log Out ⎋</button>
+        </div>
+
+        <div class="student-stats-grid">
+          <div class="dash-stat-card">
+            <span class="stat-number text-cyan">42</span>
+            <span class="stat-label">Problems Solved</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="stat-number">1,840</span>
+            <span class="stat-label">Contest Rating</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="stat-number text-green">94.2%</span>
+            <span class="stat-label">Acceptance Rate</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="stat-number text-gold">8 Days</span>
+            <span class="stat-label">Current Streak 🔥</span>
+          </div>
+        </div>
+
+        <div class="dash-action-row">
+          <button type="button" class="btn-dash-primary" onclick="window.scrollToStudentIDE()">
+            <span>Active Coding IDE Workspace ↓</span>
+          </button>
+          <a href="/#arena-section" class="btn-dash-secondary">
+            <span>View Registered Contests</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- POST-AUTH MODAL / DASHBOARD SIMULATION: Admin Console -->
+      <div class="dashboard-panel hidden" id="admin-dashboard">
+        <div class="dash-header">
+          <div class="dash-user-info">
+            <div class="user-avatar admin-avatar">⚡</div>
+            <div>
+              <h2 class="dash-name">Dr. Marcus Sterling</h2>
+              <span class="dash-role-tag text-red">HEAD JUDGE // ROOT PRIVILEGES</span>
+            </div>
+          </div>
+          <button class="btn-logout" onclick="window.handleLogout()">Exit Console ⎋</button>
+        </div>
+
+        <div class="admin-stats-grid">
+          <div class="dash-stat-card">
+            <span class="stat-number text-cyan">18,492</span>
+            <span class="stat-label">Total Submissions Evaluated</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="stat-number text-green">8 Nodes</span>
+            <span class="stat-label">Docker Sandboxes Online</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="stat-number">148</span>
+            <span class="stat-label">Active Problem Bank</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="stat-number text-gold">0.008s</span>
+            <span class="stat-label">Average P99 Compiler Time</span>
+          </div>
+        </div>
+
+        <!-- Quick Admin Management Actions -->
+        <div class="admin-quick-tasks">
+          <h4 class="tasks-title">ADMINISTRATIVE MODULES</h4>
+          <div class="admin-modules-list">
+            <div class="admin-module-item">
+              <span class="m-icon">➕</span>
+              <div class="m-info">
+                <strong>Create New Problem</strong>
+                <span>Specify title, time limit, memory limit, sample input & test case archives</span>
+              </div>
+              <button class="btn-module-action" onclick="alert('Opened Add Problem Modal in Admin Console.');">Configure</button>
+            </div>
+
+            <div class="admin-module-item">
+              <span class="m-icon">🧪</span>
+              <div class="m-info">
+                <strong>Hidden Test Case Manager</strong>
+                <span>Upload encrypted .in and .out test suites for automated judge grading</span>
+              </div>
+              <button class="btn-module-action" onclick="alert('Test Case Archive Manager: 148 problems synced with gVisor sandbox.');">Manage</button>
+            </div>
+
+            <div class="admin-module-item">
+              <span class="m-icon">📡</span>
+              <div class="m-info">
+                <strong>Live Submissions Telemetry Stream</strong>
+                <span>Inspect real-time student submissions, verdicts, memory consumption, and TLE traps</span>
+              </div>
+              <button class="btn-module-action" onclick="alert('Live Submission Stream active: 24 submissions in queue.');">Inspect</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-action-row">
+          <a href="/" class="btn-dash-primary">
+            <span>Return to Public Homepage</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- LIVE CODING JUDGE IDE WORKBENCH PANEL -->
+      <div class="ide-workbench-panel hidden" id="ide-workbench-section">
+        
+        <!-- Guest Mode Header (visible when role is 'ide') -->
+        <div class="guest-ide-banner" id="guest-ide-banner">
+          <div class="guest-ide-banner-left">
+            <span class="pulse-indicator-green"></span>
+            <span><strong>GUEST SANDBOX SESSION</strong> // Isolated gVisor Compiler Execution</span>
+          </div>
+          <div class="guest-ide-banner-right">
+            <span>Want to save submissions & join ranked contests?</span>
+            <button type="button" class="btn-banner-login" onclick="window.switchRole('student')">Sign In to Student Portal →</button>
+          </div>
+        </div>
+
+        <!-- Student Mode Header (visible when in student dashboard) -->
+        <div class="student-ide-banner hidden" id="student-ide-banner">
+          <div class="student-ide-banner-left">
+            <span class="pulse-indicator-cyan"></span>
+            <span><strong>STUDENT WORKSPACE IDE</strong> // Submissions evaluated & recorded</span>
+          </div>
+          <div class="student-ide-banner-right">
+            <span class="text-cyan font-mono" id="ide-student-roll-badge">ROLL: 0863CS221045</span>
+          </div>
+        </div>
+
+        <!-- The complete IDE Workbench Card -->
+        <div class="ide-workbench-card" id="portal-ide-card">
+          <!-- IDE Top Toolbar -->
+          <div class="ide-toolbar">
+            <div class="ide-problem-selector-group">
+              <label for="problem-select" class="ide-label">CHALLENGE:</label>
+              <select id="problem-select" class="ide-select">
+                <option value="two-sum">001. Two Sum (Easy)</option>
+                <option value="longest-substring">003. Longest Substring Without Repeating (Med)</option>
+                <option value="valid-parens">020. Valid Parentheses (Easy)</option>
+                <option value="median-arrays">004. Median of Two Sorted Arrays (Hard)</option>
+              </select>
+            </div>
+
+            <div class="ide-lang-selector-group">
+              <label for="lang-select" class="ide-label">LANGUAGE:</label>
+              <select id="lang-select" class="ide-select">
+                <option value="python">Python 3.14 (CPython)</option>
+                <option value="cpp">C++20 (GCC -O3)</option>
+                <option value="javascript">JavaScript (Node.js 22)</option>
+              </select>
+            </div>
+
+            <div class="ide-actions-group">
+              <button id="reset-code-btn" class="ide-btn-secondary" title="Reset starter code">
+                <span>Reset Code</span>
+              </button>
+              <button id="run-code-btn" class="ide-btn-run" title="Test sample cases">
+                <span>▶ Run Sample</span>
+              </button>
+              <button id="submit-code-btn" class="ide-btn-submit" title="Evaluate all testcases">
+                <span class="submit-glow"></span>
+                <span>⚡ Submit Code</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- IDE Main Workspace Grid -->
+          <div class="ide-grid">
+            <!-- Left Column: Problem Description & Constraints -->
+            <div class="ide-problem-pane">
+              <div class="pane-header">
+                <span class="difficulty-badge badge-easy" id="prob-diff">EASY</span>
+                <h3 class="problem-heading" id="prob-title">Two Sum</h3>
+              </div>
+
+              <div class="problem-body" id="prob-desc">
+                <p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to <code>target</code>.</p>
+                <p>You may assume that each input would have exactly one solution, and you may not use the same element twice.</p>
+              </div>
+
+              <div class="problem-examples" id="prob-examples">
+                <div class="example-box">
+                  <div class="ex-title">Example 1:</div>
+                  <pre><code>Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
+                </div>
+              </div>
+
+              <div class="problem-constraints">
+                <div class="constraints-title">Constraints:</div>
+                <ul class="constraints-list" id="prob-constraints">
+                  <li><code>2 &lt;= nums.length &lt;= 10^4</code></li>
+                  <li><code>-10^9 &lt;= nums[i] &lt;= 10^9</code></li>
+                  <li><code>-10^9 &lt;= target &lt;= 10^9</code></li>
+                  <li>Only one valid answer exists.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Right Column: Code Editor & Console Output -->
+            <div class="ide-code-pane">
+              <div class="editor-header">
+                <div class="editor-tabs">
+                  <span class="editor-tab active" id="editor-file-tab">solution.py</span>
+                </div>
+                <div class="editor-meta">
+                  <span class="meta-tag">MEMORY LIMIT: 256MB</span>
+                  <span class="meta-tag">TIME LIMIT: 1.0s</span>
+                </div>
+              </div>
+
+              <!-- Interactive Code Editor Textarea -->
+              <div class="editor-container">
+                <div class="line-numbers" id="line-numbers"></div>
+                <textarea id="code-editor" class="code-textarea" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+              </div>
+
+              <!-- Console Output & Verdict Terminal -->
+              <div class="terminal-pane" id="terminal-pane">
+                <div class="terminal-header">
+                  <div class="terminal-title">
+                    <span class="terminal-dot"></span>
+                    <span>JUDGE EVALUATION TERMINAL</span>
+                  </div>
+                  <div class="verdict-banner hidden" id="verdict-banner">
+                    <span id="verdict-pill" class="verdict-pill">ACCEPTED</span>
+                    <span id="verdict-metrics" class="verdict-metrics">14ms • 14.2 MB</span>
+                  </div>
+                </div>
+                <div class="terminal-body" id="terminal-body">
+                  <div class="terminal-placeholder">
+                    Ready to execute. Click <strong>"▶ Run Sample"</strong> to check test cases or <strong>"⚡ Submit Code"</strong> for official verdict.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- REAL GOOGLE OAUTH 2.0 SETUP & CONNECT MODAL -->
+  <div class="google-modal-overlay hidden" id="google-config-modal" onclick="if(event.target === this) window.closeGoogleConfigModal();">
+    <div class="google-modal-card google-config-card">
+      <div class="google-modal-header">
+        <div class="google-modal-logo">
+          <svg class="google-svg" viewBox="0 0 24 24" width="28" height="28">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+          </svg>
+          <span class="google-modal-brand">Real Google Sign-In</span>
+        </div>
+        <button class="google-modal-close" onclick="window.closeGoogleConfigModal()" title="Close">✕</button>
+      </div>
+
+      <div class="google-modal-body">
+        <h3 class="google-modal-title">Connect Real Google Accounts</h3>
+        <p class="google-modal-sub" id="google-config-sub">Authenticate securely via Google OAuth 2.0 for <span class="text-cyan">http://localhost:3000</span></p>
+
+        <form id="google-config-form" onsubmit="event.preventDefault(); window.saveGoogleClientIdAndLogin();">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="google-client-id-input">Google Cloud Web Client ID</label>
+            <input type="text" id="google-client-id-input" required placeholder="xxxxxxxxxxxx-xxxxxxxxxxxxxxxx.apps.googleusercontent.com" autocomplete="off" style="font-family: monospace; font-size: 0.85rem;">
+            <span class="input-hint-subtle">Enter your Google Cloud OAuth 2.0 Web Client ID to launch the real Google login popup.</span>
+          </div>
+
+          <div class="google-guide-box">
+            <div class="guide-step-title">📋 How to get your Google Client ID:</div>
+            <ol class="guide-steps-list">
+              <li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="guide-link">Google Cloud Console → Credentials ↗</a></li>
+              <li>Click <strong>+ CREATE CREDENTIALS</strong> → <strong>OAuth client ID</strong> (Type: <em>Web application</em>).</li>
+              <li>Under <strong>Authorized JavaScript origins</strong>, add: <br><code class="code-pill">http://localhost:3000</code> and <code class="code-pill">http://127.0.0.1:3000</code></li>
+              <li>Copy the generated <strong>Client ID</strong> and paste it above!</li>
+            </ol>
+          </div>
+
+          <div class="google-config-actions">
+            <button type="submit" class="btn-auth-submit btn-student-theme" id="btn-save-google-client">
+              <span>Save & Launch Real Google Login →</span>
+            </button>
+            <button type="button" class="btn-clear-client-id" id="btn-clear-client-id" onclick="window.clearGoogleClientId()">
+              Clear Saved Client ID
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="google-modal-footer">
+        <p>Google Identity Services securely handles user authentication directly on <strong>accounts.google.com</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/login.js?v=3"></script>
+</body>
+</html>
