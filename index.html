@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=8">
+  <link rel="stylesheet" href="/style.css?v=9">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 </head>
 <body class="bg-dark text-slate-100 antialiased selection-brand">
@@ -188,6 +188,140 @@
       </div>
     </section>
 
+    <!-- SECTION: Judge Engine Architecture & Sandboxed Compiler Pipeline -->
+    <section class="section-container" id="judge-engine">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="section-tag">SANDBOX EXECUTION ARCHITECTURE</div>
+          <h2 class="section-headline">Sub-Millisecond Judge Engine Architecture</h2>
+          <p class="section-subtitle">
+            Isolated Linux kernel sandboxing, hardware memory fencing, and real-time execution telemetry engineered for competitive scale.
+          </p>
+        </div>
+
+        <!-- 4-Stage Architecture Pipeline Grid -->
+        <div class="arch-pipeline-grid">
+          <!-- Stage 1 -->
+          <div class="arch-stage-card">
+            <div class="arch-stage-number">01</div>
+            <div class="arch-stage-icon">⚡</div>
+            <h3 class="arch-stage-title">Ingestion & Static Check</h3>
+            <p class="arch-stage-desc">
+              Source code pre-screening, AST validation, infinite-loop early heuristics, and memory pre-allocation.
+            </p>
+            <div class="arch-badge-metric">
+              <span class="text-cyan font-mono">&lt; 0.5ms</span> Latency
+            </div>
+          </div>
+
+          <!-- Stage 2 -->
+          <div class="arch-stage-card">
+            <div class="arch-stage-number">02</div>
+            <div class="arch-stage-icon">🛡️</div>
+            <h3 class="arch-stage-title">Kernel Sandboxed Jail</h3>
+            <p class="arch-stage-desc">
+              Hardware-isolated container runtime utilizing <code>seccomp-bpf</code>, <code>cgroups v2</code>, and network namespace blackholing.
+            </p>
+            <div class="arch-badge-metric">
+              <span class="text-cyan font-mono">100%</span> Sandbox Fence
+            </div>
+          </div>
+
+          <!-- Stage 3 -->
+          <div class="arch-stage-card">
+            <div class="arch-stage-number">03</div>
+            <div class="arch-stage-icon">⏱️</div>
+            <h3 class="arch-stage-title">Microsecond Watchdog</h3>
+            <p class="arch-stage-desc">
+              High-resolution CPU cycles timer with 0.008s TLE precision and strict 256MB memory boundary enforcement.
+            </p>
+            <div class="arch-badge-metric">
+              <span class="text-cyan font-mono">0.008s</span> TLE Watchdog
+            </div>
+          </div>
+
+          <!-- Stage 4 -->
+          <div class="arch-stage-card">
+            <div class="arch-stage-number">04</div>
+            <div class="arch-stage-icon">📊</div>
+            <h3 class="arch-stage-title">Telemetry & Verdict</h3>
+            <p class="arch-stage-desc">
+              Differential stream evaluation across 100+ test vectors in parallel with immediate sub-millisecond verdict dispatch.
+            </p>
+            <div class="arch-badge-metric">
+              <span class="text-cyan font-mono">&lt; 12ms</span> Final Verdict
+            </div>
+          </div>
+        </div>
+
+        <!-- Verdict Evaluation Matrix Showcase -->
+        <div class="arch-verdict-showcase">
+          <div class="arch-verdict-header text-center">
+            <h4 class="arch-verdict-title">Automated Verdict Decision Matrix</h4>
+            <p class="arch-verdict-desc">Sub-millisecond classification across multi-batch test vectors</p>
+          </div>
+          
+          <div class="verdict-badges-grid">
+            <div class="verdict-card verdict-ac">
+              <div class="v-icon">✓</div>
+              <div class="v-info">
+                <span class="v-title">ACCEPTED (AC)</span>
+                <span class="v-sub">All testcases matched ground truth</span>
+              </div>
+            </div>
+
+            <div class="verdict-card verdict-wa">
+              <div class="v-icon">✕</div>
+              <div class="v-info">
+                <span class="v-title">WRONG ANSWER (WA)</span>
+                <span class="v-sub">Output mismatch at token / line level</span>
+              </div>
+            </div>
+
+            <div class="verdict-card verdict-tle">
+              <div class="v-icon">⏱</div>
+              <div class="v-info">
+                <span class="v-title">TIME LIMIT EXCEEDED (TLE)</span>
+                <span class="v-sub">Execution exceeded 1.000s runtime quota</span>
+              </div>
+            </div>
+
+            <div class="verdict-card verdict-ce">
+              <div class="v-icon">⚠️</div>
+              <div class="v-info">
+                <span class="v-title">COMPILATION ERROR (CE)</span>
+                <span class="v-sub">Syntax or linker diagnostics caught</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Architecture Live Metrics Banner -->
+        <div class="arch-metrics-banner">
+          <div class="arch-metric-col">
+            <span class="arch-metric-num text-cyan">10,000+</span>
+            <span class="arch-metric-lbl">Concurrent Tests / Sec</span>
+          </div>
+          <div class="arch-metric-sep"></div>
+          <div class="arch-metric-col">
+            <span class="arch-metric-num">&lt; 12ms</span>
+            <span class="arch-metric-lbl">Median Verdict Dispatch</span>
+          </div>
+          <div class="arch-metric-sep"></div>
+          <div class="arch-metric-col">
+            <span class="arch-metric-num text-gold">256 MB</span>
+            <span class="arch-metric-lbl">Strict Isolated Memory</span>
+          </div>
+          <div class="arch-metric-sep"></div>
+          <div class="arch-metric-col">
+            <span class="arch-metric-num text-green">99.99%</span>
+            <span class="arch-metric-lbl">Sandbox Isolation SLA</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- SECTION: Competitive Programming Arena & Leaderboard -->
     <section class="section-container" id="arena-section">
       <div class="container">
@@ -312,7 +446,7 @@
             <a href="#">Problem Set (1,200+)</a>
             <a href="#">API Documentation</a>
             <a href="#">Verdict Reference</a>
-            <a href="#">System Architecture</a>
+            <a href="#judge-engine">System Architecture</a>
           </div>
         </div>
       </div>
@@ -328,6 +462,6 @@
     </div>
   </footer>
 
-  <script src="/app.js?v=8"></script>
+  <script src="/app.js?v=9"></script>
 </body>
 </html>

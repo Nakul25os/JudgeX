@@ -891,6 +891,47 @@ console.log("Median:", findMedianSortedArrays([1, 3], [2])); // 2
     setupIDE();
     loadProblem('two-sum', 'python');
     startContestTimer();
+    setupNavigation();
+  }
+
+  // --- Smooth Navigation & Active Anchor Tracking ---
+  function setupNavigation() {
+    const navLinks = document.querySelectorAll('.nav-links a[href^="#"], a[href="#judge-engine"]');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        const targetId = link.getAttribute('href');
+        if (!targetId || targetId === '#') return;
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (history.pushState) {
+            history.pushState(null, null, targetId);
+          }
+          document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+          const mainNavLink = document.querySelector(`.nav-links a[href="${targetId}"]`);
+          if (mainNavLink) mainNavLink.classList.add('active');
+        }
+      });
+    });
+
+    // ScrollSpy to highlight corresponding active link as user scrolls
+    const sections = ['#hero', '#languages-grid', '#judge-engine', '#arena-section'];
+    window.addEventListener('scroll', () => {
+      const scrollPos = window.scrollY + 140;
+      sections.forEach(id => {
+        const el = document.querySelector(id);
+        const link = document.querySelector(`.nav-links a[href="${id}"]`);
+        if (el && link) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+          }
+        }
+      });
+    }, { passive: true });
   }
 
   if (document.readyState === 'loading') {
