@@ -128,16 +128,18 @@ html, body {
   max-width: 1360px;
 }
 
-/* Role Switcher Tabs */
+/* Role Switcher Tabs - Separated Individual Sections */
 .auth-role-tabs {
   display: flex;
-  background: rgba(14, 14, 20, 0.8);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 6px;
-  margin-bottom: 20px;
-  gap: 8px;
-  backdrop-filter: blur(16px);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 24px;
+  gap: 16px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  width: 100%;
 }
 
 .role-tab {
@@ -145,39 +147,68 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 18px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 12px;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(14, 16, 25, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   color: var(--text-secondary);
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.25s var(--ease-out-expo);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 .role-tab:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(22, 26, 40, 0.85);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.role-tab:active {
+  transform: translateY(0);
 }
 
 .role-tab.active {
-  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
-  border-color: var(--border-hover);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 #tab-student.active {
-  border-color: rgba(0, 214, 255, 0.35);
-  color: var(--accent-cyan);
+  background: linear-gradient(135deg, rgba(0, 110, 255, 0.18) 0%, rgba(0, 214, 255, 0.12) 100%);
+  border-color: rgba(0, 214, 255, 0.55);
+  color: var(--accent-cyan, #00d6ff);
+  box-shadow: 0 8px 25px -4px rgba(0, 214, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 #tab-admin.active {
-  border-color: rgba(239, 68, 68, 0.45);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.12) 100%);
+  border-color: rgba(239, 68, 68, 0.55);
   color: #f87171;
+  box-shadow: 0 8px 25px -4px rgba(239, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+#tab-ide.active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.12) 100%);
+  border-color: rgba(245, 158, 11, 0.55);
+  color: #fbbf24;
+  box-shadow: 0 8px 25px -4px rgba(245, 158, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .auth-role-tabs {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .tab-icon {
