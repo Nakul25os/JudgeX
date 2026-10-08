@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=7">
-  <link rel="stylesheet" href="/login.css?v=4">
+  <link rel="stylesheet" href="/login.css?v=5">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
   <!-- Official Google Identity Services SDK for Real Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -54,7 +54,7 @@
           <span class="tab-icon">👨‍💻</span>
           <span class="tab-label">Student Portal</span>
         </button>
-        <button class="role-tab" id="tab-admin" data-role="admin">
+        <button class="role-tab" id="tab-admin" data-role="admin" style="display: none;">
           <span class="tab-icon">🛡️</span>
           <span class="tab-label">Admin Console</span>
         </button>
@@ -144,6 +144,10 @@
               <span class="sandbox-dot"></span>
               <span>⚡ Practice Mode: Launch Interactive Coding Judge IDE (Guest Sandbox) →</span>
             </button>
+          </div>
+
+          <div class="role-switch-footer-link">
+            <span>Faculty or Evaluator? <a href="/login.html?role=admin" onclick="event.preventDefault(); window.switchRole('admin');">Access Admin Console →</a></span>
           </div>
         </form>
 
@@ -267,6 +271,10 @@
           <button type="submit" class="btn-auth-submit btn-student-theme">
             <span>Complete Registration & Open IDE →</span>
           </button>
+
+          <div class="role-switch-footer-link">
+            <span>Faculty or Evaluator? <a href="/login.html?role=admin" onclick="event.preventDefault(); window.switchRole('admin');">Access Admin Console →</a></span>
+          </div>
         </form>
 
       </div>
@@ -345,6 +353,10 @@
             <span class="btn-glow"></span>
             <span>Authenticate as Administrator ⚡</span>
           </button>
+
+          <div class="role-switch-footer-link admin-switch">
+            <span>Student account? <a href="/login.html?role=student" onclick="event.preventDefault(); window.switchRole('student');">← Return to Student Portal</a></span>
+          </div>
         </form>
 
       </div>
@@ -658,6 +670,6 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
     </div>
   </div>
 
-  <script src="/login.js?v=3"></script>
+  <script src="/login.js?v=4"></script>
 </body>
 </html>

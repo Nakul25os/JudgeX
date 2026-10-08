@@ -1346,3 +1346,36 @@ select option:checked {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Subtle Footer Role Switch Link */
+.role-switch-footer-link {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.role-switch-footer-link a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-left: 6px;
+}
+
+.role-switch-footer-link a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 214, 255, 0.6);
+  text-decoration: underline;
+}
+
+.role-switch-footer-link.admin-switch a {
+  color: #f87171;
+}
+
+.role-switch-footer-link.admin-switch a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}

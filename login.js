@@ -30,11 +30,23 @@
   const studentSub = document.getElementById('student-sub');
 
   // --- Role Switcher (Student vs Admin vs Sandbox IDE) ---
+  let activeRoleContext = 'student';
+
   function setRole(role) {
     if (role === 'ide') {
       if (tabIde) tabIde.classList.add('active');
       if (tabStudent) tabStudent.classList.remove('active');
       if (tabAdmin) tabAdmin.classList.remove('active');
+
+      // Maintain isolated role view: keep Admin hidden if in Student context, keep Student hidden if in Admin context
+      if (activeRoleContext === 'admin') {
+        if (tabAdmin) tabAdmin.style.display = '';
+        if (tabStudent) tabStudent.style.display = 'none';
+      } else {
+        if (tabStudent) tabStudent.style.display = '';
+        if (tabAdmin) tabAdmin.style.display = 'none';
+      }
+
       if (studentCard) studentCard.classList.add('hidden');
       if (adminCard) adminCard.classList.add('hidden');
       if (studentDashboard) studentDashboard.classList.add('hidden');
@@ -45,8 +57,15 @@
       if (authCardWrapper) authCardWrapper.classList.add('expanded-ide');
       if (authGlow) authGlow.className = 'auth-ambient-glow ide-glow';
     } else if (role === 'admin') {
-      if (tabAdmin) tabAdmin.classList.add('active');
-      if (tabStudent) tabStudent.classList.remove('active');
+      activeRoleContext = 'admin';
+      if (tabAdmin) {
+        tabAdmin.classList.add('active');
+        tabAdmin.style.display = ''; // Show Admin Console
+      }
+      if (tabStudent) {
+        tabStudent.classList.remove('active');
+        tabStudent.style.display = 'none'; // Don't show Student Portal on Admin Console
+      }
       if (tabIde) tabIde.classList.remove('active');
       if (adminCard) adminCard.classList.remove('hidden');
       if (studentCard) studentCard.classList.add('hidden');
@@ -57,8 +76,15 @@
       if (authGlow) authGlow.className = 'auth-ambient-glow admin-glow';
     } else {
       // Student Mode
-      if (tabStudent) tabStudent.classList.add('active');
-      if (tabAdmin) tabAdmin.classList.remove('active');
+      activeRoleContext = 'student';
+      if (tabStudent) {
+        tabStudent.classList.add('active');
+        tabStudent.style.display = ''; // Show Student Portal
+      }
+      if (tabAdmin) {
+        tabAdmin.classList.remove('active');
+        tabAdmin.style.display = 'none'; // Don't show Admin Console on Student Portal
+      }
       if (tabIde) tabIde.classList.remove('active');
       if (adminCard) adminCard.classList.add('hidden');
       if (adminDashboard) adminDashboard.classList.add('hidden');
@@ -275,13 +301,19 @@
     const params = new URLSearchParams(window.location.search);
     const role = params.get('role');
     const view = params.get('view');
+    const isPathAdmin = window.location.pathname.toLowerCase().includes('admin');
 
     if (view === 'ide' || role === 'ide') {
+      if (role === 'admin' || isPathAdmin) {
+        activeRoleContext = 'admin';
+      } else {
+        activeRoleContext = 'student';
+      }
       setRole('ide');
       return;
     }
 
-    if (role === 'admin') {
+    if (role === 'admin' || isPathAdmin) {
       setRole('admin');
       return;
     }
