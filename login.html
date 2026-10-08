@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=7">
-  <link rel="stylesheet" href="/login.css?v=5">
+  <link rel="stylesheet" href="/login.css?v=6">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
   <!-- Official Google Identity Services SDK for Real Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -426,7 +426,7 @@
             <span class="stat-label">Docker Sandboxes Online</span>
           </div>
           <div class="dash-stat-card">
-            <span class="stat-number">148</span>
+            <span class="stat-number text-cyan" id="admin-problem-count">148</span>
             <span class="stat-label">Active Problem Bank</span>
           </div>
           <div class="dash-stat-card">
@@ -445,7 +445,7 @@
                 <strong>Create New Problem</strong>
                 <span>Specify title, time limit, memory limit, sample input & test case archives</span>
               </div>
-              <button class="btn-module-action" onclick="alert('Opened Add Problem Modal in Admin Console.');">Configure</button>
+              <button class="btn-module-action" id="btn-open-create-problem" onclick="window.openAdminCreateProblemModal();">Configure</button>
             </div>
 
             <div class="admin-module-item">
@@ -454,7 +454,7 @@
                 <strong>Hidden Test Case Manager</strong>
                 <span>Upload encrypted .in and .out test suites for automated judge grading</span>
               </div>
-              <button class="btn-module-action" onclick="alert('Test Case Archive Manager: 148 problems synced with gVisor sandbox.');">Manage</button>
+              <button class="btn-module-action" id="btn-open-testcase-mgr" onclick="window.openAdminTestCaseModal();">Manage</button>
             </div>
 
             <div class="admin-module-item">
@@ -463,7 +463,7 @@
                 <strong>Live Submissions Telemetry Stream</strong>
                 <span>Inspect real-time student submissions, verdicts, memory consumption, and TLE traps</span>
               </div>
-              <button class="btn-module-action" onclick="alert('Live Submission Stream active: 24 submissions in queue.');">Inspect</button>
+              <button class="btn-module-action" id="btn-open-telemetry-stream" onclick="window.openAdminTelemetryModal();">Inspect</button>
             </div>
           </div>
         </div>
@@ -670,6 +670,267 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
     </div>
   </div>
 
-  <script src="/login.js?v=4"></script>
+  <!-- =====================================================================
+       ADMINISTRATIVE FEATURE MODALS
+       ===================================================================== -->
+
+  <!-- 1. CREATE NEW PROBLEM MODAL -->
+  <div class="google-modal-overlay hidden" id="admin-create-problem-modal" onclick="if(event.target === this) window.closeAdminCreateProblemModal();">
+    <div class="google-modal-card admin-feature-modal-card">
+      <div class="google-modal-header">
+        <div class="google-modal-logo">
+          <span class="admin-modal-badge-icon">➕</span>
+          <div>
+            <span class="google-modal-brand">Create & Publish New Problem</span>
+            <span class="admin-modal-badge text-cyan">SANDBOX COMPILER CONFIGURATOR</span>
+          </div>
+        </div>
+        <button class="google-modal-close" onclick="window.closeAdminCreateProblemModal()" title="Close">✕</button>
+      </div>
+
+      <div class="google-modal-body">
+        <p class="google-modal-sub">Define problem specifications, algorithmic limits, and starter templates for the JudgeX evaluation engine.</p>
+
+        <form id="admin-new-problem-form" onsubmit="event.preventDefault(); window.handleCreateNewProblem();">
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label for="new-prob-title">Problem Title</label>
+              <input type="text" id="new-prob-title" required placeholder="e.g. Longest Substring Without Repeating Characters">
+            </div>
+            <div class="form-group">
+              <label for="new-prob-diff">Difficulty Level</label>
+              <select id="new-prob-diff" class="auth-select">
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM" selected>Medium</option>
+                <option value="HARD">Hard</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label for="new-prob-time">Time Limit (Seconds)</label>
+              <input type="text" id="new-prob-time" required value="1.0s" placeholder="1.0s">
+            </div>
+            <div class="form-group">
+              <label for="new-prob-mem">Memory Limit (MB)</label>
+              <input type="text" id="new-prob-mem" required value="256 MB" placeholder="256 MB">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="new-prob-desc">Problem Statement Description</label>
+            <textarea id="new-prob-desc" rows="3" required class="admin-modal-textarea" placeholder="Given a string s, find the length of the longest substring without duplicate characters..."></textarea>
+          </div>
+
+          <div class="form-row-grid">
+            <div class="form-group">
+              <label for="new-prob-sample-in">Sample Input</label>
+              <textarea id="new-prob-sample-in" rows="2" required class="admin-modal-textarea font-mono" placeholder="s = &quot;abcabcbb&quot;"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="new-prob-sample-out">Sample Output</label>
+              <textarea id="new-prob-sample-out" rows="2" required class="admin-modal-textarea font-mono" placeholder="3"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="new-prob-constraints">Constraints</label>
+            <input type="text" id="new-prob-constraints" class="font-mono" value="0 <= s.length <= 5 * 10^4, s consists of English letters, digits, symbols." placeholder="e.g. 1 <= nums.length <= 10^4">
+          </div>
+
+          <div class="form-group">
+            <label for="new-prob-starter-code">Initial Python Starter Code</label>
+            <textarea id="new-prob-starter-code" rows="3" class="admin-modal-textarea font-mono" placeholder="def solution(s: str) -> int:&#10;    # Write your algorithmic solution here&#10;    pass"></textarea>
+          </div>
+
+          <div class="google-config-actions">
+            <button type="submit" class="btn-auth-submit btn-admin-theme" id="btn-publish-problem">
+              <span>Publish to Judge Sandbox ⚡</span>
+            </button>
+            <button type="button" class="btn-clear-client-id" onclick="window.closeAdminCreateProblemModal()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. HIDDEN TEST CASE MANAGER MODAL -->
+  <div class="google-modal-overlay hidden" id="admin-testcase-modal" onclick="if(event.target === this) window.closeAdminTestCaseModal();">
+    <div class="google-modal-card admin-feature-modal-card testcase-modal-card">
+      <div class="google-modal-header">
+        <div class="google-modal-logo">
+          <span class="admin-modal-badge-icon">🧪</span>
+          <div>
+            <span class="google-modal-brand">Hidden Test Case Archive Manager</span>
+            <span class="admin-modal-badge text-gold">ENCRYPTED GVISOR SUITES</span>
+          </div>
+        </div>
+        <button class="google-modal-close" onclick="window.closeAdminTestCaseModal()" title="Close">✕</button>
+      </div>
+
+      <div class="google-modal-body">
+        <div class="testcase-toolbar">
+          <div class="testcase-select-group">
+            <label for="testcase-problem-select">Target Problem Archive:</label>
+            <select id="testcase-problem-select" class="auth-select" onchange="window.renderTestCaseList(this.value)">
+              <!-- Populated dynamically via JS -->
+            </select>
+          </div>
+          <span class="testcase-status-badge">
+            <span class="sandbox-dot"></span>
+            <span id="testcase-sync-status">gVisor Sandbox Synced</span>
+          </span>
+        </div>
+
+        <div class="testcase-list-container">
+          <div class="testcase-list-header">
+            <span>ACTIVE TEST CASES IN SECURE JAIL</span>
+            <span id="testcase-count-pill" class="text-cyan font-mono">3 Test Cases</span>
+          </div>
+          <div class="testcase-items-list" id="testcase-items-list">
+            <!-- Dynamic list of testcases -->
+          </div>
+        </div>
+
+        <!-- Add New Test Case Form -->
+        <div class="add-testcase-box">
+          <h5 class="add-testcase-title">➕ Add New Test Case Vector</h5>
+          <form id="add-testcase-form" onsubmit="event.preventDefault(); window.handleAddTestCase();">
+            <div class="form-row-grid">
+              <div class="form-group">
+                <label for="tc-input">Input (.in vector)</label>
+                <textarea id="tc-input" rows="2" required class="admin-modal-textarea font-mono" placeholder="nums = [3, 2, 4], target = 6"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="tc-output">Expected Output (.out vector)</label>
+                <textarea id="tc-output" rows="2" required class="admin-modal-textarea font-mono" placeholder="[1, 2]"></textarea>
+              </div>
+            </div>
+
+            <div class="testcase-options-row">
+              <label class="remember-checkbox-label">
+                <input type="checkbox" id="tc-hidden" checked>
+                <span>Encrypt as Hidden Evaluation Case (Strict confidential jail)</span>
+              </label>
+              <div class="tc-points-group">
+                <label for="tc-points">Points:</label>
+                <input type="number" id="tc-points" value="25" min="5" max="100" class="input-points">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-add-testcase">
+              <span>+ Encrypt & Add to Problem Test Archive</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="google-config-actions" style="margin-top: 20px;">
+          <button type="button" class="btn-auth-submit btn-admin-theme" onclick="window.syncAllTestCasesToWorker();">
+            <span>Sync All Suites to Compiler Workers ⚡</span>
+          </button>
+          <button type="button" class="btn-clear-client-id" onclick="window.closeAdminTestCaseModal()">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. LIVE SUBMISSIONS TELEMETRY STREAM MODAL -->
+  <div class="google-modal-overlay hidden" id="admin-telemetry-modal" onclick="if(event.target === this) window.closeAdminTelemetryModal();">
+    <div class="google-modal-card admin-feature-modal-card telemetry-modal-card">
+      <div class="google-modal-header">
+        <div class="google-modal-logo">
+          <span class="admin-modal-badge-icon">📡</span>
+          <div>
+            <span class="google-modal-brand">Live Submissions Telemetry Stream</span>
+            <span class="admin-modal-badge text-green">LIVE KERNEL MONITOR</span>
+          </div>
+        </div>
+        <button class="google-modal-close" onclick="window.closeAdminTelemetryModal()" title="Close">✕</button>
+      </div>
+
+      <div class="google-modal-body">
+        <div class="telemetry-toolbar">
+          <div class="telemetry-live-indicator">
+            <span class="pulse-indicator-green"></span>
+            <span>STREAM ACTIVE // 8 WORKER CORES ONLINE</span>
+          </div>
+          <div class="telemetry-actions-group">
+            <div class="telemetry-filter-group">
+              <label for="telemetry-filter">Filter:</label>
+              <select id="telemetry-filter" class="auth-select" onchange="window.filterTelemetryVerdicts(this.value)">
+                <option value="ALL">All Verdicts</option>
+                <option value="ACCEPTED">Accepted Only</option>
+                <option value="WRONG ANSWER">Wrong Answer Only</option>
+                <option value="TIME LIMIT EXCEEDED">TLE Only</option>
+                <option value="COMPILATION ERROR">CE Only</option>
+              </select>
+            </div>
+            <button type="button" class="btn-simulate-sub" onclick="window.simulateIncomingSubmission();">
+              <span>⚡ Simulate Incoming Submission</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Telemetry Table -->
+        <div class="telemetry-table-wrapper">
+          <table class="telemetry-table">
+            <thead>
+              <tr>
+                <th>TIMESTAMP</th>
+                <th>CANDIDATE / ROLL</th>
+                <th>PROBLEM</th>
+                <th>LANG</th>
+                <th>RUNTIME</th>
+                <th>MEMORY</th>
+                <th>VERDICT</th>
+                <th>INSPECT</th>
+              </tr>
+            </thead>
+            <tbody id="telemetry-table-body">
+              <!-- Dynamically populated live rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Inspection Code Viewer -->
+        <div class="telemetry-inspect-drawer hidden" id="telemetry-inspect-drawer">
+          <div class="inspect-drawer-header">
+            <div>
+              <span class="inspect-title" id="inspect-drawer-title">Submission Diagnostics #84920</span>
+              <span class="inspect-sub" id="inspect-drawer-sub">0863CS221045 — Two Sum (Python 3.14)</span>
+            </div>
+            <button type="button" class="btn-close-inspect" onclick="document.getElementById('telemetry-inspect-drawer').classList.add('hidden')">✕ Close</button>
+          </div>
+          <div class="inspect-drawer-body">
+            <div class="inspect-metrics-row" id="inspect-drawer-metrics">
+              <span class="inspect-tag">CPU Cycles: 184,290</span>
+              <span class="inspect-tag">gVisor Sandboxed: Yes</span>
+              <span class="inspect-tag">Memory High Watermark: 14.2 MB</span>
+            </div>
+            <pre class="inspect-code-block"><code id="inspect-drawer-code"># Submitted Code</code></pre>
+          </div>
+        </div>
+
+        <div class="google-config-actions" style="margin-top: 16px;">
+          <button type="button" class="btn-clear-client-id" onclick="window.closeAdminTelemetryModal()">
+            Close Telemetry Stream
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING JUDGEX TOAST NOTIFICATION -->
+  <div class="judge-toast hidden" id="judge-toast">
+    <span class="toast-icon" id="judge-toast-icon">⚡</span>
+    <span class="toast-message" id="judge-toast-msg">Action completed successfully.</span>
+  </div>
+
+  <script src="/login.js?v=6"></script>
 </body>
 </html>

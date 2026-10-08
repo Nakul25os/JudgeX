@@ -1122,7 +1122,468 @@ console.log("Median:", findMedianSortedArrays([1, 3], [2])); // 2
     }, 450);
   }
 
+  // =========================================================================
+  // ADMINISTRATIVE MODULES: PROBLEM CREATOR, TEST CASE MGR & TELEMETRY STREAM
+  // =========================================================================
+
+  // Floating Toast Notification
+  window.showJudgeToast = function (msg, icon = '⚡') {
+    const toast = document.getElementById('judge-toast');
+    const msgEl = document.getElementById('judge-toast-msg');
+    const iconEl = document.getElementById('judge-toast-icon');
+    if (!toast) return;
+
+    if (msgEl) msgEl.textContent = msg;
+    if (iconEl) iconEl.textContent = icon;
+
+    toast.classList.remove('hidden');
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(16px)';
+      setTimeout(() => toast.classList.add('hidden'), 350);
+    }, 3500);
+  };
+
+  // --- MODULE 1: CREATE NEW PROBLEM ---
+  const adminCreateProblemModal = document.getElementById('admin-create-problem-modal');
+
+  window.openAdminCreateProblemModal = function () {
+    if (adminCreateProblemModal) adminCreateProblemModal.classList.remove('hidden');
+  };
+
+  window.closeAdminCreateProblemModal = function () {
+    if (adminCreateProblemModal) adminCreateProblemModal.classList.add('hidden');
+  };
+
+  window.handleCreateNewProblem = function () {
+    const title = (document.getElementById('new-prob-title').value || '').trim();
+    const diff = document.getElementById('new-prob-diff').value;
+    const timeLimit = (document.getElementById('new-prob-time').value || '1.0s').trim();
+    const memLimit = (document.getElementById('new-prob-mem').value || '256 MB').trim();
+    const desc = (document.getElementById('new-prob-desc').value || '').trim();
+    const sampleIn = (document.getElementById('new-prob-sample-in').value || '').trim();
+    const sampleOut = (document.getElementById('new-prob-sample-out').value || '').trim();
+    const constraints = (document.getElementById('new-prob-constraints').value || '').split(',').map(s => s.trim()).filter(Boolean);
+    const starterPy = document.getElementById('new-prob-starter-code').value || '# Write your solution\npass';
+
+    if (!title || !desc) {
+      alert('Please fill in Problem Title and Description.');
+      return;
+    }
+
+    const key = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const diffClass = diff === 'EASY' ? 'badge-easy' : diff === 'HARD' ? 'badge-hard' : 'badge-medium';
+
+    const newProblemObj = {
+      title,
+      difficulty: diff,
+      diffClass,
+      timeLimit,
+      memLimit,
+      desc: `<p>${desc}</p>`,
+      examples: `
+        <div class="example-box">
+          <div class="ex-title">Sample 1:</div>
+          <pre><code>Input: ${sampleIn}\nOutput: ${sampleOut}</code></pre>
+        </div>
+      `,
+      constraints: constraints.length ? constraints : ['Standard algorithmic limits apply'],
+      templates: {
+        python: starterPy,
+        cpp: `// ${title} (C++20)\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Solution template\n    return 0;\n}`,
+        javascript: `// ${title} (JavaScript)\nfunction solution() {\n    // Solution template\n}\n`
+      }
+    };
+
+    // Store in global PROBLEMS dictionary
+    PROBLEMS[key] = newProblemObj;
+
+    // Persist custom problems in localStorage
+    try {
+      const stored = JSON.parse(localStorage.getItem('judgex_custom_problems') || '{}');
+      stored[key] = newProblemObj;
+      localStorage.setItem('judgex_custom_problems', JSON.stringify(stored));
+    } catch(e) {}
+
+    // Update problem select dropdowns in IDE and in Testcase Manager
+    syncProblemDropdowns();
+
+    // Increment Problem Bank count in dashboard
+    const countEl = document.getElementById('admin-problem-count');
+    if (countEl) {
+      const current = parseInt(countEl.textContent, 10) || 148;
+      countEl.textContent = current + 1;
+    }
+
+    window.closeAdminCreateProblemModal();
+    window.showJudgeToast(`Problem "${title}" published to Sandbox Problem Bank!`, '🚀');
+
+    // Switch to the newly created problem in the IDE
+    if (problemSelect) {
+      problemSelect.value = key;
+      loadProblem(key, langSelect ? langSelect.value : 'python');
+    }
+  };
+
+  // --- MODULE 2: HIDDEN TEST CASE ARCHIVE MANAGER ---
+  const adminTestCaseModal = document.getElementById('admin-testcase-modal');
+  const defaultTestCases = {
+    'two-sum': [
+      { input: 'nums = [2, 7, 11, 15], target = 9', output: '[0, 1]', hidden: false, points: 10 },
+      { input: 'nums = [3, 2, 4], target = 6', output: '[1, 2]', hidden: true, points: 25 },
+      { input: 'nums = [3, 3], target = 6', output: '[0, 1]', hidden: true, points: 25 },
+      { input: 'nums = [10^5 elements random], target = 184920', output: '[492, 8829]', hidden: true, points: 40 }
+    ],
+    'valid-parentheses': [
+      { input: 's = "()"', output: 'true', hidden: false, points: 10 },
+      { input: 's = "()[]{}"', output: 'true', hidden: true, points: 20 },
+      { input: 's = "(]"', output: 'false', hidden: true, points: 20 },
+      { input: 's = "([)]"', output: 'false', hidden: true, points: 25 },
+      { input: 's = "{[]}"', output: 'true', hidden: true, points: 25 }
+    ],
+    'reverse-linked-list': [
+      { input: 'head = [1, 2, 3, 4, 5]', output: '[5, 4, 3, 2, 1]', hidden: false, points: 15 },
+      { input: 'head = [1, 2]', output: '[2, 1]', hidden: true, points: 35 },
+      { input: 'head = []', output: '[]', hidden: true, points: 50 }
+    ],
+    'median-arrays': [
+      { input: 'nums1 = [1, 3], nums2 = [2]', output: '2.0', hidden: false, points: 20 },
+      { input: 'nums1 = [1, 2], nums2 = [3, 4]', output: '2.5', hidden: true, points: 40 },
+      { input: 'nums1 = [0, 0], nums2 = [0, 0]', output: '0.0', hidden: true, points: 40 }
+    ]
+  };
+
+  window.openAdminTestCaseModal = function () {
+    syncProblemDropdowns();
+    const tcProbSelect = document.getElementById('testcase-problem-select');
+    const selectedKey = (tcProbSelect && tcProbSelect.value) || (problemSelect && problemSelect.value) || 'two-sum';
+    if (tcProbSelect) tcProbSelect.value = selectedKey;
+    window.renderTestCaseList(selectedKey);
+    if (adminTestCaseModal) adminTestCaseModal.classList.remove('hidden');
+  };
+
+  window.closeAdminTestCaseModal = function () {
+    if (adminTestCaseModal) adminTestCaseModal.classList.add('hidden');
+  };
+
+  function getTestCasesForProblem(key) {
+    try {
+      const stored = localStorage.getItem(`judgex_testcases_${key}`);
+      if (stored) return JSON.parse(stored);
+    } catch(e) {}
+    return defaultTestCases[key] || [
+      { input: 'Default sample input vector', output: 'Expected output vector', hidden: false, points: 20 },
+      { input: 'Hidden edge-case test vector', output: 'Verified edge output', hidden: true, points: 80 }
+    ];
+  }
+
+  function saveTestCasesForProblem(key, list) {
+    try {
+      localStorage.setItem(`judgex_testcases_${key}`, JSON.stringify(list));
+    } catch(e) {}
+  }
+
+  window.renderTestCaseList = function (probKey) {
+    const container = document.getElementById('testcase-items-list');
+    const countPill = document.getElementById('testcase-count-pill');
+    if (!container) return;
+
+    const cases = getTestCasesForProblem(probKey);
+    if (countPill) countPill.textContent = `${cases.length} Test Cases`;
+
+    if (!cases.length) {
+      container.innerHTML = `<div style="text-align: center; color: var(--text-tertiary); padding: 18px; font-size: 0.85rem;">No test cases found for this problem yet. Add one below!</div>`;
+      return;
+    }
+
+    container.innerHTML = cases.map((tc, idx) => `
+      <div class="testcase-card-item">
+        <div class="tc-card-left">
+          <span class="tc-badge-num">#${idx + 1}</span>
+          <div class="tc-io-preview">
+            <div><span style="color: var(--text-tertiary);">IN:</span> ${escapeHtml(tc.input.length > 55 ? tc.input.slice(0, 52) + '...' : tc.input)}</div>
+            <div><span style="color: var(--text-tertiary);">OUT:</span> ${escapeHtml(tc.output.length > 55 ? tc.output.slice(0, 52) + '...' : tc.output)}</div>
+          </div>
+        </div>
+        <div class="tc-card-right">
+          <span class="${tc.hidden ? 'tc-tag-hidden' : 'tc-tag-sample'}">${tc.hidden ? '🔒 HIDDEN (' + tc.points + ' pts)' : '👁 SAMPLE (' + tc.points + ' pts)'}</span>
+          <button type="button" class="btn-tc-delete" onclick="window.deleteTestCase('${probKey}', ${idx})" title="Remove Test Case">🗑</button>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  window.handleAddTestCase = function () {
+    const tcProbSelect = document.getElementById('testcase-problem-select');
+    const probKey = (tcProbSelect && tcProbSelect.value) || 'two-sum';
+    const inputVal = (document.getElementById('tc-input').value || '').trim();
+    const outputVal = (document.getElementById('tc-output').value || '').trim();
+    const isHidden = document.getElementById('tc-hidden').checked;
+    const points = parseInt(document.getElementById('tc-points').value, 10) || 25;
+
+    if (!inputVal || !outputVal) {
+      alert('Please provide both Input (.in) and Expected Output (.out) vectors.');
+      return;
+    }
+
+    const currentCases = getTestCasesForProblem(probKey);
+    currentCases.push({
+      input: inputVal,
+      output: outputVal,
+      hidden: isHidden,
+      points: points
+    });
+
+    saveTestCasesForProblem(probKey, currentCases);
+    window.renderTestCaseList(probKey);
+
+    document.getElementById('tc-input').value = '';
+    document.getElementById('tc-output').value = '';
+
+    window.showJudgeToast(`Test case #${currentCases.length} encrypted in sandbox jail!`, '🧪');
+  };
+
+  window.deleteTestCase = function (probKey, index) {
+    const currentCases = getTestCasesForProblem(probKey);
+    if (index >= 0 && index < currentCases.length) {
+      currentCases.splice(index, 1);
+      saveTestCasesForProblem(probKey, currentCases);
+      window.renderTestCaseList(probKey);
+      window.showJudgeToast('Test case removed.', '🗑️');
+    }
+  };
+
+  window.syncAllTestCasesToWorker = function () {
+    const syncStatusEl = document.getElementById('testcase-sync-status');
+    if (syncStatusEl) {
+      syncStatusEl.textContent = 'Syncing 8 worker nodes...';
+      syncStatusEl.style.color = '#fbbf24';
+      setTimeout(() => {
+        syncStatusEl.textContent = 'All 8 Nodes Online & Encrypted ✓';
+        syncStatusEl.style.color = '#34d399';
+        window.showJudgeToast('All test suites synced & compiled into secure sandbox worker jail!', '⚡');
+      }, 600);
+    }
+  };
+
+  // --- MODULE 3: LIVE SUBMISSIONS TELEMETRY STREAM ---
+  const adminTelemetryModal = document.getElementById('admin-telemetry-modal');
+  let activeTelemetryFilter = 'ALL';
+  let telemetrySubmissions = [
+    {
+      id: 84928,
+      time: '12s ago',
+      student: 'Alex Vance (0863CS221045)',
+      problem: 'Two Sum',
+      lang: 'Python 3.14',
+      runtime: '14ms',
+      memory: '14.2 MB',
+      verdict: 'ACCEPTED',
+      code: `class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        seen = {}\n        for i, n in enumerate(nums):\n            diff = target - n\n            if diff in seen:\n                return [seen[diff], i]\n            seen[n] = i\n        return []`
+    },
+    {
+      id: 84927,
+      time: '42s ago',
+      student: 'Dev Patel (0863IT221089)',
+      problem: 'Two Sum',
+      lang: 'C++20',
+      runtime: '2ms',
+      memory: '4.1 MB',
+      verdict: 'ACCEPTED',
+      code: `#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        unordered_map<int, int> m;\n        for (int i = 0; i < nums.size(); ++i) {\n            int comp = target - nums[i];\n            if (m.count(comp)) return {m[comp], i};\n            m[nums[i]] = i;\n        }\n        return {};\n    }\n};`
+    },
+    {
+      id: 84926,
+      time: '1m ago',
+      student: 'Sara Chen (0863CS221012)',
+      problem: 'Valid Parentheses',
+      lang: 'Java 21',
+      runtime: '1002ms',
+      memory: '48.5 MB',
+      verdict: 'TIME LIMIT EXCEEDED',
+      code: `// Unbuffered nested regex scan causes quadratic TLE\nclass Solution {\n    public boolean isValid(String s) {\n        while (s.contains("()") || s.contains("[]") || s.contains("{}")) {\n            s = s.replace("()", "").replace("[]", "").replace("{}", "");\n        }\n        return s.isEmpty();\n    }\n}`
+    },
+    {
+      id: 84925,
+      time: '2m ago',
+      student: 'Rohan Mehta (0863EC221034)',
+      problem: 'Reverse Linked List',
+      lang: 'C++20',
+      runtime: '0ms',
+      memory: '0.0 MB',
+      verdict: 'COMPILATION ERROR',
+      code: `ListNode* reverseList(ListNode* head) {\n    ListNode* prev = nullptr;\n    // Missing semicolon\n    ListNode* curr = head\n    while (curr) {\n        ListNode* next = curr->next;\n        curr->next = prev;\n        prev = curr;\n        curr = next;\n    }\n    return prev;\n}`
+    },
+    {
+      id: 84924,
+      time: '3m ago',
+      student: 'Maya Lin (0863CS221099)',
+      problem: 'Two Sum',
+      lang: 'Node.js 22',
+      runtime: '28ms',
+      memory: '22.4 MB',
+      verdict: 'WRONG ANSWER',
+      code: `function twoSum(nums, target) {\n    // Incorrect 1-based index calculation\n    for (let i = 0; i < nums.length; i++) {\n        for (let j = i + 1; j < nums.length; j++) {\n            if (nums[i] + nums[j] === target) return [i + 1, j + 1];\n        }\n    }\n    return [];\n}`
+    }
+  ];
+
+  window.openAdminTelemetryModal = function () {
+    renderTelemetryTable();
+    if (adminTelemetryModal) adminTelemetryModal.classList.remove('hidden');
+  };
+
+  window.closeAdminTelemetryModal = function () {
+    if (adminTelemetryModal) adminTelemetryModal.classList.add('hidden');
+  };
+
+  function renderTelemetryTable() {
+    const tbody = document.getElementById('telemetry-table-body');
+    if (!tbody) return;
+
+    const filtered = telemetrySubmissions.filter(s => {
+      if (activeTelemetryFilter === 'ALL') return true;
+      return s.verdict === activeTelemetryFilter;
+    });
+
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-tertiary); padding: 24px;">No submissions matching filter "${activeTelemetryFilter}".</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(s => {
+      let tagClass = 'tag-ac';
+      if (s.verdict === 'WRONG ANSWER') tagClass = 'tag-wa';
+      else if (s.verdict === 'TIME LIMIT EXCEEDED') tagClass = 'tag-tle';
+      else if (s.verdict === 'COMPILATION ERROR') tagClass = 'tag-ce';
+
+      return `
+        <tr>
+          <td style="font-family: var(--font-mono); color: var(--text-tertiary); font-size: 0.75rem;">${s.time}</td>
+          <td style="font-weight: 600;">${escapeHtml(s.student)}</td>
+          <td style="color: var(--accent-cyan);">${escapeHtml(s.problem)}</td>
+          <td style="font-family: var(--font-mono); font-size: 0.75rem;">${s.lang}</td>
+          <td style="font-family: var(--font-mono);">${s.runtime}</td>
+          <td style="font-family: var(--font-mono); color: var(--text-secondary);">${s.memory}</td>
+          <td><span class="verdict-tag ${tagClass}">${s.verdict}</span></td>
+          <td><button type="button" class="btn-inspect-row" onclick="window.inspectSubmissionRow(${s.id})">Inspect</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.filterTelemetryVerdicts = function (filterVal) {
+    activeTelemetryFilter = filterVal;
+    renderTelemetryTable();
+  };
+
+  window.simulateIncomingSubmission = function () {
+    const candidates = [
+      { name: 'Alex Vance', roll: '0863CS221045' },
+      { name: 'Priya Sharma', roll: '0863CS221077' },
+      { name: 'Marcus Sterling', roll: '0863IT221034' },
+      { name: 'Kevin Zhang', roll: '0863EC221099' }
+    ];
+    const probs = ['Two Sum', 'Valid Parentheses', 'Reverse Linked List', 'Median of Two Sorted Arrays'];
+    const langs = ['C++20', 'Python 3.14', 'Java 21', 'Node.js 22'];
+    const verdicts = ['ACCEPTED', 'ACCEPTED', 'ACCEPTED', 'WRONG ANSWER', 'TIME LIMIT EXCEEDED'];
+
+    const randCand = candidates[Math.floor(Math.random() * candidates.length)];
+    const randProb = probs[Math.floor(Math.random() * probs.length)];
+    const randLang = langs[Math.floor(Math.random() * langs.length)];
+    const randVerdict = verdicts[Math.floor(Math.random() * verdicts.length)];
+    const randRuntime = randVerdict === 'TIME LIMIT EXCEEDED' ? '1004ms' : (Math.floor(Math.random() * 28) + 2) + 'ms';
+    const randMem = (Math.floor(Math.random() * 20) + 4) + '.' + Math.floor(Math.random() * 9) + ' MB';
+    const newId = Math.floor(Math.random() * 90000) + 10000;
+
+    telemetrySubmissions.unshift({
+      id: newId,
+      time: 'Just now',
+      student: `${randCand.name} (${randCand.roll})`,
+      problem: randProb,
+      lang: randLang,
+      runtime: randRuntime,
+      memory: randMem,
+      verdict: randVerdict,
+      code: `// Real-Time Evaluated Submission #${newId}\n// Candidate: ${randCand.name} (${randCand.roll})\n// Problem: ${randProb} [${randLang}]\n\nint solution() {\n    // Evaluation result: ${randVerdict} (Runtime: ${randRuntime})\n    return 0;\n}`
+    });
+
+    renderTelemetryTable();
+    window.showJudgeToast(`Incoming submission #${newId} evaluated: ${randVerdict}!`, '📡');
+  };
+
+  window.inspectSubmissionRow = function (subId) {
+    const item = telemetrySubmissions.find(s => s.id === subId);
+    if (!item) return;
+
+    const drawer = document.getElementById('telemetry-inspect-drawer');
+    const titleEl = document.getElementById('inspect-drawer-title');
+    const subEl = document.getElementById('inspect-drawer-sub');
+    const codeEl = document.getElementById('inspect-drawer-code');
+    const metricsEl = document.getElementById('inspect-drawer-metrics');
+
+    if (titleEl) titleEl.textContent = `Submission Diagnostics #${item.id} — ${item.verdict}`;
+    if (subEl) subEl.textContent = `${item.student} • ${item.problem} (${item.lang}) • Evaluated: ${item.time}`;
+    if (codeEl) codeEl.textContent = item.code;
+
+    if (metricsEl) {
+      metricsEl.innerHTML = `
+        <span class="inspect-tag">Runtime: ${item.runtime}</span>
+        <span class="inspect-tag">Peak RAM: ${item.memory}</span>
+        <span class="inspect-tag">gVisor Sandbox: Verified Isolated</span>
+        <span class="inspect-tag">Verdict: ${item.verdict}</span>
+      `;
+    }
+
+    if (drawer) {
+      drawer.classList.remove('hidden');
+      drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function syncProblemDropdowns() {
+    // Sync IDE dropdown
+    if (problemSelect) {
+      const currentVal = problemSelect.value;
+      problemSelect.innerHTML = Object.keys(PROBLEMS).map(k => {
+        const p = PROBLEMS[k];
+        return `<option value="${k}">${p.title} (${p.difficulty})</option>`;
+      }).join('');
+      if (PROBLEMS[currentVal]) problemSelect.value = currentVal;
+    }
+
+    // Sync Testcase problem dropdown
+    const tcProbSelect = document.getElementById('testcase-problem-select');
+    if (tcProbSelect) {
+      const currentVal = tcProbSelect.value;
+      tcProbSelect.innerHTML = Object.keys(PROBLEMS).map(k => {
+        const p = PROBLEMS[k];
+        return `<option value="${k}">${p.title} (${p.difficulty})</option>`;
+      }).join('');
+      if (PROBLEMS[currentVal]) tcProbSelect.value = currentVal;
+    }
+  }
+
+  // Load custom stored problems on boot
+  try {
+    const savedCustom = JSON.parse(localStorage.getItem('judgex_custom_problems') || '{}');
+    Object.assign(PROBLEMS, savedCustom);
+    const countEl = document.getElementById('admin-problem-count');
+    if (countEl && Object.keys(savedCustom).length) {
+      countEl.textContent = 148 + Object.keys(savedCustom).length;
+    }
+  } catch(e) {}
+
   // Initialize
   setupIDE();
   checkUrlParams();
+  syncProblemDropdowns();
 })();
