@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=7">
+  <link rel="stylesheet" href="/style.css?v=11">
   <link rel="stylesheet" href="/login.css?v=6">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
   <!-- Official Google Identity Services SDK for Real Google Sign-In -->
@@ -203,10 +203,11 @@
             <div class="form-group">
               <label for="reg-lang">Preferred Language</label>
               <select id="reg-lang" class="auth-select">
-                <option value="cpp">C++20 (GCC)</option>
-                <option value="python">Python 3.14</option>
-                <option value="java">Java 21 LTS</option>
-                <option value="js">JavaScript (Node.js)</option>
+                <option value="cpp">C++</option>
+                <option value="c">C</option>
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="js">JavaScript</option>
               </select>
             </div>
           </div>
@@ -376,20 +377,58 @@
 
         <div class="student-stats-grid">
           <div class="dash-stat-card">
-            <span class="stat-number text-cyan">42</span>
+            <span class="stat-number text-cyan" id="student-stat-solved">0</span>
             <span class="stat-label">Problems Solved</span>
           </div>
           <div class="dash-stat-card">
-            <span class="stat-number">1,840</span>
-            <span class="stat-label">Contest Rating</span>
+            <span class="stat-number" id="student-stat-total">0</span>
+            <span class="stat-label">Total Submissions</span>
           </div>
           <div class="dash-stat-card">
-            <span class="stat-number text-green">94.2%</span>
+            <span class="stat-number text-green" id="student-stat-rate">0.0%</span>
             <span class="stat-label">Acceptance Rate</span>
           </div>
           <div class="dash-stat-card">
-            <span class="stat-number text-gold">8 Days</span>
-            <span class="stat-label">Current Streak 🔥</span>
+            <span class="stat-number text-gold" id="student-stat-streak">Active</span>
+            <span class="stat-label">MongoDB Sync 🔥</span>
+          </div>
+        </div>
+
+        <!-- Student Submission History (Database Persistent) -->
+        <div class="student-history-card">
+          <div class="student-history-header">
+            <div class="history-title-group">
+              <span class="history-icon">📜</span>
+              <div>
+                <h3 class="student-history-heading">Submissions & Code History</h3>
+                <span class="db-live-tag"><span class="pulse-indicator-cyan"></span> STORED IN MONGODB DATABASE</span>
+              </div>
+            </div>
+            <div class="history-header-ctrls">
+              <button type="button" class="btn-refresh-history" onclick="window.refreshStudentHistory()">
+                <span>↻ Refresh Submissions</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="telemetry-table-wrapper student-history-wrapper">
+            <table class="telemetry-table student-sub-table">
+              <thead>
+                <tr>
+                  <th>SUBMISSION ID</th>
+                  <th>PROBLEM</th>
+                  <th>LANG</th>
+                  <th>RUNTIME</th>
+                  <th>MEMORY</th>
+                  <th>VERDICT</th>
+                  <th>SUBMITTED</th>
+                  <th>CODE</th>
+                </tr>
+              </thead>
+              <tbody id="student-history-table-body">
+                <tr><td colspan="8" style="text-align: center; color: var(--text-tertiary); padding: 24px;">Loading submissions from MongoDB...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -418,20 +457,20 @@
 
         <div class="admin-stats-grid">
           <div class="dash-stat-card">
-            <span class="stat-number text-cyan">18,492</span>
-            <span class="stat-label">Total Submissions Evaluated</span>
+            <span class="stat-number text-cyan" id="admin-stat-total">--</span>
+            <span class="stat-label">Total Submissions (DB)</span>
           </div>
           <div class="dash-stat-card">
-            <span class="stat-number text-green">8 Nodes</span>
-            <span class="stat-label">Docker Sandboxes Online</span>
+            <span class="stat-number text-green" id="admin-stat-students">--</span>
+            <span class="stat-label">Registered Students</span>
           </div>
           <div class="dash-stat-card">
             <span class="stat-number text-cyan" id="admin-problem-count">148</span>
             <span class="stat-label">Active Problem Bank</span>
           </div>
           <div class="dash-stat-card">
-            <span class="stat-number text-gold">0.008s</span>
-            <span class="stat-label">Average P99 Compiler Time</span>
+            <span class="stat-number text-gold" id="admin-stat-rate">--</span>
+            <span class="stat-label">Platform Acceptance Rate</span>
           </div>
         </div>
 
@@ -518,9 +557,11 @@
             <div class="ide-lang-selector-group">
               <label for="lang-select" class="ide-label">LANGUAGE:</label>
               <select id="lang-select" class="ide-select">
-                <option value="python">Python 3.14 (CPython)</option>
-                <option value="cpp">C++20 (GCC -O3)</option>
-                <option value="javascript">JavaScript (Node.js 22)</option>
+                <option value="python">Python</option>
+                <option value="cpp">C++</option>
+                <option value="c">C</option>
+                <option value="java">Java</option>
+                <option value="javascript">JavaScript</option>
               </select>
             </div>
 
@@ -528,8 +569,8 @@
               <button id="reset-code-btn" class="ide-btn-secondary" title="Reset starter code">
                 <span>Reset Code</span>
               </button>
-              <button id="run-code-btn" class="ide-btn-run" title="Test sample cases">
-                <span>▶ Run Sample</span>
+              <button id="run-code-btn" class="ide-btn-run" title="Run code">
+                <span>▶ Run Code</span>
               </button>
               <button id="submit-code-btn" class="ide-btn-submit" title="Evaluate all testcases">
                 <span class="submit-glow"></span>
@@ -576,35 +617,82 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
             <div class="ide-code-pane">
               <div class="editor-header">
                 <div class="editor-tabs">
-                  <span class="editor-tab active" id="editor-file-tab">solution.py</span>
+                  <span class="editor-tab active" id="editor-file-tab">
+                    <span id="tab-lang-icon" class="tab-lang-icon">🐍</span>
+                    <span id="tab-filename">solution.py</span>
+                    <span class="tab-indicator-ready" title="File synchronized">●</span>
+                  </span>
                 </div>
-                <div class="editor-meta">
-                  <span class="meta-tag">MEMORY LIMIT: 256MB</span>
-                  <span class="meta-tag">TIME LIMIT: 1.0s</span>
+                <div class="editor-toolbar-actions">
+                  <button type="button" class="editor-tool-btn" id="btn-format-code" title="Auto-indent & format code">
+                    <span>⚡ Format</span>
+                  </button>
+                  <button type="button" class="editor-tool-btn" id="btn-toggle-minimap" title="Toggle minimap view">
+                    <span>🗺 Minimap</span>
+                  </button>
+                  <div class="editor-font-group">
+                    <button type="button" class="editor-font-btn" id="btn-font-dec" title="Decrease font size">A-</button>
+                    <button type="button" class="editor-font-btn" id="btn-font-inc" title="Increase font size">A+</button>
+                  </div>
+                  <div class="editor-meta">
+                    <span class="meta-tag">LIMIT: 256MB / 1.0s</span>
+                  </div>
                 </div>
               </div>
 
-              <!-- Interactive Code Editor Textarea -->
-              <div class="editor-container">
+              <!-- Interactive Code Editor -->
+              <div class="editor-container" id="editor-container">
                 <div class="line-numbers" id="line-numbers"></div>
                 <textarea id="code-editor" class="code-textarea" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+                <div class="monaco-editor-mount" id="monaco-mount"></div>
               </div>
 
-              <!-- Console Output & Verdict Terminal -->
+              <!-- Multi-Tab Judge Terminal & Test Runner -->
               <div class="terminal-pane" id="terminal-pane">
                 <div class="terminal-header">
-                  <div class="terminal-title">
-                    <span class="terminal-dot"></span>
-                    <span>JUDGE EVALUATION TERMINAL</span>
+                  <div class="terminal-nav-tabs">
+                    <button type="button" class="term-nav-btn active" id="term-nav-console" onclick="window.switchTerminalTab('console')">
+                      <span class="terminal-dot"></span>
+                      <span>Output Console</span>
+                    </button>
+                    <button type="button" class="term-nav-btn" id="term-nav-testcases" onclick="window.switchTerminalTab('testcases')">
+                      <span>Test Cases</span>
+                      <span class="term-tab-pill" id="term-cases-pill">3 Cases</span>
+                    </button>
+                    <button type="button" class="term-nav-btn" id="term-nav-stdin" onclick="window.switchTerminalTab('stdin')">
+                      <span>Custom Input (stdin)</span>
+                    </button>
                   </div>
                   <div class="verdict-banner hidden" id="verdict-banner">
                     <span id="verdict-pill" class="verdict-pill">ACCEPTED</span>
                     <span id="verdict-metrics" class="verdict-metrics">14ms • 14.2 MB</span>
                   </div>
                 </div>
-                <div class="terminal-body" id="terminal-body">
-                  <div class="terminal-placeholder">
-                    Ready to execute. Click <strong>"▶ Run Sample"</strong> to check test cases or <strong>"⚡ Submit Code"</strong> for official verdict.
+
+                <!-- View 1: Standard Evaluation Terminal -->
+                <div class="terminal-tab-view active" id="term-view-console">
+                  <div class="terminal-body" id="terminal-body">
+                    <div class="terminal-placeholder">
+                      Ready to execute. Click <strong>"▶ Run Code"</strong> to check test cases or <strong>"⚡ Submit Code"</strong> for official verdict.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- View 2: Interactive Problem Test Cases -->
+                <div class="terminal-tab-view hidden" id="term-view-testcases">
+                  <div class="testcases-container" id="testcases-container">
+                    <!-- Populated dynamically by loadProblem -->
+                  </div>
+                </div>
+
+                <!-- View 3: Custom Stdin Input Drawer -->
+                <div class="terminal-tab-view hidden" id="term-view-stdin">
+                  <div class="custom-stdin-wrapper">
+                    <div class="custom-stdin-header">
+                      <span class="stdin-hint">Standard Input (stdin) streamed directly to your program execution:</span>
+                      <button type="button" class="btn-clear-stdin" onclick="const el = document.getElementById('custom-stdin-input'); if(el) el.value = '';">Clear</button>
+                    </div>
+                    <textarea id="custom-stdin-input" class="custom-stdin-textarea" spellcheck="false" placeholder="Enter standard input (stdin) lines here (e.g. inputs for input(), cin >>, scanf, etc.)..."></textarea>
                   </div>
                 </div>
               </div>
@@ -925,12 +1013,55 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
     </div>
   </div>
 
+  <!-- STUDENT CODE INSPECTION MODAL (DATABASE CODE VIEWER) -->
+  <div class="google-modal-overlay hidden" id="student-code-modal" onclick="if(event.target === this) window.closeStudentCodeModal();">
+    <div class="google-modal-card admin-feature-modal-card">
+      <div class="google-modal-header">
+        <div class="google-modal-logo">
+          <span class="admin-modal-badge-icon">💻</span>
+          <div>
+            <span class="google-modal-brand" id="student-modal-title">Submission Diagnostics #10005</span>
+            <span class="admin-modal-badge text-cyan" id="student-modal-meta">Two Sum • Python 3.14</span>
+          </div>
+        </div>
+        <button class="google-modal-close" onclick="window.closeStudentCodeModal()" title="Close">✕</button>
+      </div>
+
+      <div class="google-modal-body">
+        <div class="inspect-metrics-row" id="student-modal-metrics">
+          <span class="inspect-tag">Runtime: 14ms</span>
+          <span class="inspect-tag">Peak RAM: 14.2 MB</span>
+          <span class="inspect-tag">MongoDB Synced: Yes</span>
+          <span class="inspect-tag">Verdict: ACCEPTED</span>
+        </div>
+
+        <div class="code-view-container" style="margin-top: 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-tertiary); letter-spacing:0.05em;">SUBMITTED SOURCE CODE:</span>
+            <button type="button" class="btn-copy-code" id="btn-copy-student-code" onclick="window.copyModalCode()">📋 Copy Code</button>
+          </div>
+          <pre class="inspect-code-block" style="max-height: 380px; overflow-y: auto;"><code id="student-modal-code"># Submitted Code</code></pre>
+        </div>
+
+        <div class="google-config-actions" style="margin-top: 18px;">
+          <button type="button" class="btn-auth-submit btn-student-theme" onclick="window.loadSubmissionIntoIDE()">
+            <span>Load Code into Sandbox IDE ⚡</span>
+          </button>
+          <button type="button" class="btn-clear-client-id" onclick="window.closeStudentCodeModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- FLOATING JUDGEX TOAST NOTIFICATION -->
   <div class="judge-toast hidden" id="judge-toast">
     <span class="toast-icon" id="judge-toast-icon">⚡</span>
     <span class="toast-message" id="judge-toast-msg">Action completed successfully.</span>
   </div>
 
-  <script src="/login.js?v=6"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="/login.js?v=10"></script>
 </body>
 </html>

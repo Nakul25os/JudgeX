@@ -1894,3 +1894,100 @@ select option:checked {
   font-weight: 600;
   color: #ffffff;
 }
+
+/* Student Submission History Card & Database Components */
+.student-history-card {
+  background: rgba(14, 18, 28, 0.7);
+  border: 1px solid rgba(0, 214, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.student-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.history-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.history-icon {
+  font-size: 1.5rem;
+}
+
+.student-history-heading {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+}
+
+.db-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+}
+
+.btn-refresh-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 214, 255, 0.1);
+  border: 1px solid rgba(0, 214, 255, 0.35);
+  border-radius: 8px;
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-refresh-history:hover {
+  background: var(--accent-cyan);
+  color: #000000;
+  box-shadow: 0 0 14px var(--accent-cyan-glow);
+}
+
+.student-history-wrapper {
+  max-height: 320px;
+  margin-bottom: 0;
+}
+
+.student-sub-table td {
+  padding: 10px 14px;
+}
+
+.btn-copy-code {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy-code:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}

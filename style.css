@@ -1018,16 +1018,34 @@ body {
   padding: 32px 24px;
   backdrop-filter: blur(16px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-  transition: all 0.3s var(--ease-out-expo);
   display: flex;
   flex-direction: column;
+  opacity: 0;
+  transform: translateY(50px) scale(0.94);
+  filter: blur(6px);
+  will-change: transform, opacity, filter;
+  transition: transform 0.8s var(--ease-out-expo),
+              opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              background 0.3s ease;
+  transition-delay: 0s;
 }
 
-.arch-stage-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 214, 255, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 214, 255, 0.15);
-  background: rgba(18, 22, 36, 0.85);
+.arch-stage-card.is-revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0px);
+  transition-delay: calc(var(--card-index, 0) * 130ms);
+}
+
+.arch-stage-card.is-revealed:hover {
+  transform: translateY(-6px) scale(1.015);
+  border-color: rgba(0, 214, 255, 0.5);
+  box-shadow: 0 20px 45px rgba(0, 214, 255, 0.2);
+  background: rgba(18, 22, 36, 0.9);
+  transition-delay: 0s;
 }
 
 .arch-stage-number {
@@ -1458,21 +1476,89 @@ select option:checked {
   padding: 8px 16px;
   background: #090a0e;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 12px;
 }
 
 .editor-tabs {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
 .editor-tab {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--accent-cyan);
   background: rgba(0, 214, 255, 0.08);
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 6px;
-  border: 1px solid rgba(0, 214, 255, 0.2);
+  border: 1px solid rgba(0, 214, 255, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 0 12px rgba(0, 214, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.tab-lang-icon {
+  font-size: 0.95rem;
+}
+
+.tab-indicator-ready {
+  font-size: 0.6rem;
+  color: #10b981;
+}
+
+.editor-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.editor-tool-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor-tool-btn:hover {
+  background: rgba(0, 214, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(0, 214, 255, 0.35);
+}
+
+.editor-font-group {
+  display: flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.editor-font-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.editor-font-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .editor-meta {
@@ -1484,48 +1570,85 @@ select option:checked {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   color: var(--text-tertiary);
+  letter-spacing: 0.05em;
 }
 
 .editor-container {
   display: flex;
   flex: 1;
-  min-height: 340px;
-  background: #0b0c10;
+  min-height: 420px;
+  background: #07080d;
   position: relative;
+  overflow: hidden;
 }
 
-.line-numbers {
-  width: 48px;
-  padding: 16px 8px;
+.monaco-editor-mount {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  display: none;
+  background: #07080d;
+}
+
+.editor-container.has-monaco #line-numbers,
+.editor-container.has-monaco #code-editor {
+  display: none !important;
+}
+
+.editor-container.has-monaco .monaco-editor-mount {
+  display: block !important;
+}
+
+/* Scoped specifically to fallback line-numbers only so Monaco editor is NEVER affected */
+#editor-container > #line-numbers {
+  width: 52px;
+  padding: 16px 10px;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.3);
   text-align: right;
   user-select: none;
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: pre;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: #090a10;
+}
+
+/* Guard Monaco's internal line numbers from any external CSS interference */
+.monaco-editor .line-numbers {
+  padding: 0 !important;
+  width: auto !important;
+  background: transparent !important;
+  border: none !important;
+  line-height: inherit !important;
+  box-sizing: content-box !important;
 }
 
 .code-textarea {
   flex: 1;
-  background: transparent;
+  background: #07080d;
   border: none;
   outline: none;
   resize: none;
   padding: 16px;
-  font-family: var(--font-mono);
+  font-family: 'JetBrains Mono', Consolas, monospace;
   font-size: 0.88rem;
   line-height: 1.5;
   color: #e2e8f0;
   tab-size: 4;
   white-space: pre;
+  caret-color: #00d6ff;
 }
 
-/* Terminal Console Pane */
+/* Terminal Console Pane with Tabs */
 .terminal-pane {
   background: var(--bg-terminal);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  min-height: 180px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
 }
@@ -1534,19 +1657,57 @@ select option:checked {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 18px;
+  padding: 6px 16px;
   background: #050608;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.terminal-title {
+.terminal-nav-tabs {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
+  gap: 6px;
+}
+
+.term-nav-btn {
+  background: transparent;
+  border: 1px solid transparent;
   color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.term-nav-btn:hover {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.term-nav-btn.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 214, 255, 0.08);
+  border-color: rgba(0, 214, 255, 0.25);
+  font-weight: 600;
+}
+
+.term-tab-pill {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.term-nav-btn.active .term-tab-pill {
+  background: rgba(0, 214, 255, 0.2);
+  color: #00d6ff;
 }
 
 .terminal-dot {
@@ -1596,19 +1757,166 @@ select option:checked {
   color: var(--text-secondary);
 }
 
+.terminal-tab-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-tab-view.hidden {
+  display: none !important;
+}
+
 .terminal-body {
   padding: 18px;
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.85rem;
   line-height: 1.6;
-  color: #94a3b8;
+  color: #cbd5e1;
   flex: 1;
   overflow-y: auto;
+  max-height: 280px;
 }
 
 .terminal-placeholder {
   color: var(--text-tertiary);
   font-style: italic;
+}
+
+/* Testcases Tab View */
+.testcases-container {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  overflow-y: auto;
+  max-height: 280px;
+}
+
+.testcase-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px;
+  transition: all 0.2s ease;
+}
+
+.testcase-card:hover {
+  border-color: rgba(0, 214, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.testcase-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.testcase-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+}
+
+.testcase-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.testcase-badge.passed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.testcase-badge.pending {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.testcase-row {
+  margin-bottom: 6px;
+}
+
+.testcase-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.testcase-val {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Custom Stdin Drawer */
+.custom-stdin-wrapper {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.custom-stdin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.stdin-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.btn-clear-stdin {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-clear-stdin:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.custom-stdin-textarea {
+  width: 100%;
+  height: 140px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  resize: vertical;
+  outline: none;
+}
+
+.custom-stdin-textarea:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 214, 255, 0.2);
 }
 
 /* ==========================================================================
@@ -1618,6 +1926,7 @@ select option:checked {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
+  perspective: 1200px;
 }
 
 .bento-card {
@@ -1630,13 +1939,50 @@ select option:checked {
   backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
-  transition: transform 0.35s var(--ease-out-expo), border-color 0.35s ease, box-shadow 0.35s ease;
+  /* Initial hidden state for scroll reveal (each box comes one by one) */
+  opacity: 0;
+  transform: translateY(60px) scale(0.92);
+  filter: blur(8px);
+  will-change: transform, opacity, filter;
+  transition: transform 0.85s var(--ease-out-expo),
+              opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s ease,
+              box-shadow 0.35s ease;
+  transition-delay: 0s;
 }
 
-.bento-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--border-hover);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+/* Revealed state triggered one by one on scroll */
+.bento-card.is-revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0px);
+  transition-delay: calc(var(--card-index, 0) * 150ms);
+}
+
+.bento-card.is-revealed:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 214, 255, 0.22);
+  transition-delay: 0s;
+}
+
+/* Subtle sweep light beam on top border when revealed */
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+  transition: left 0.85s var(--ease-out-expo);
+  pointer-events: none;
+}
+
+.bento-card.is-revealed::before {
+  left: 100%;
+  transition-delay: calc(var(--card-index, 0) * 150ms + 180ms);
 }
 
 .bento-badge {
