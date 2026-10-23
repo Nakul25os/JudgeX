@@ -233,7 +233,10 @@
       if (ideWorkbenchSection) ideWorkbenchSection.classList.remove('hidden');
       if (guestIdeBanner) guestIdeBanner.classList.add('hidden');
       if (studentIdeBanner) studentIdeBanner.classList.remove('hidden');
-      if (authCardWrapper) authCardWrapper.classList.add('expanded-ide');
+      if (authCardWrapper) {
+        authCardWrapper.classList.add('expanded-ide');
+        authCardWrapper.classList.add('expanded-dashboard');
+      }
 
       if (typeof initMonacoEditor === 'function') {
         initMonacoEditor();
@@ -245,7 +248,10 @@
       }, 100);
     } else {
       if (ideWorkbenchSection) ideWorkbenchSection.classList.add('hidden');
-      if (authCardWrapper) authCardWrapper.classList.remove('expanded-ide');
+      if (authCardWrapper) {
+        authCardWrapper.classList.add('expanded-dashboard');
+        authCardWrapper.classList.add('expanded-ide');
+      }
 
       if (sectionName === 'overview') {
         if (viewOverview) viewOverview.classList.remove('hidden');
@@ -262,6 +268,10 @@
   };
 
   function showStudentWorkspace(sessionData) {
+    if (authCardWrapper) {
+      authCardWrapper.classList.add('expanded-dashboard');
+      authCardWrapper.classList.add('expanded-ide');
+    }
     if (studentCard) studentCard.classList.add('hidden');
     if (studentDashboard) {
       studentDashboard.classList.remove('hidden');

@@ -111,21 +111,27 @@ html, body {
 .auth-main-container {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 40px 20px 80px 20px;
+  padding: 30px 24px 80px 24px;
   position: relative;
   z-index: 5;
+  width: 100%;
 }
 
 .auth-card-wrapper {
   max-width: 580px;
   width: 100%;
-  transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.auth-card-wrapper.expanded-ide {
-  max-width: 1360px;
+.auth-card-wrapper.expanded-ide,
+.auth-card-wrapper.expanded-dashboard,
+.auth-card-wrapper:has(#student-dashboard:not(.hidden)),
+.auth-card-wrapper:has(#admin-dashboard:not(.hidden)),
+.auth-card-wrapper:has(#ide-workbench-section:not(.hidden)) {
+  max-width: 1440px;
+  width: 100%;
 }
 
 /* Role Switcher Tabs - Separated Individual Sections */
