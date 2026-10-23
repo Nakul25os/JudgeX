@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=11">
-  <link rel="stylesheet" href="/login.css?v=6">
+  <link rel="stylesheet" href="/login.css?v=7">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
   <!-- Official Google Identity Services SDK for Real Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -372,73 +372,253 @@
               <span class="dash-role-tag text-cyan" id="dash-student-roll">STUDENT // ROLL: 0863CS221045</span>
             </div>
           </div>
-          <button class="btn-logout" onclick="window.handleLogout()">Log Out ⎋</button>
-        </div>
-
-        <div class="student-stats-grid">
-          <div class="dash-stat-card">
-            <span class="stat-number text-cyan" id="student-stat-solved">0</span>
-            <span class="stat-label">Problems Solved</span>
-          </div>
-          <div class="dash-stat-card">
-            <span class="stat-number" id="student-stat-total">0</span>
-            <span class="stat-label">Total Submissions</span>
-          </div>
-          <div class="dash-stat-card">
-            <span class="stat-number text-green" id="student-stat-rate">0.0%</span>
-            <span class="stat-label">Acceptance Rate</span>
-          </div>
-          <div class="dash-stat-card">
-            <span class="stat-number text-gold" id="student-stat-streak">Active</span>
-            <span class="stat-label">MongoDB Sync 🔥</span>
+          <div class="dash-header-actions">
+            <button class="btn-logout" onclick="window.handleLogout()">Log Out ⎋</button>
           </div>
         </div>
 
-        <!-- Student Submission History (Database Persistent) -->
-        <div class="student-history-card">
-          <div class="student-history-header">
-            <div class="history-title-group">
-              <span class="history-icon">📜</span>
-              <div>
-                <h3 class="student-history-heading">Submissions & Code History</h3>
-                <span class="db-live-tag"><span class="pulse-indicator-cyan"></span> STORED IN MONGODB DATABASE</span>
-              </div>
+        <!-- Student Portal Section Navigation Tabs -->
+        <div class="student-portal-subnav" id="student-portal-subnav">
+          <button type="button" class="student-subnav-btn" id="subnav-btn-overview" onclick="window.switchStudentSection('overview')">
+            <span class="subnav-icon">📊</span>
+            <span>Dashboard Overview</span>
+          </button>
+          <button type="button" class="student-subnav-btn active" id="subnav-btn-ide" onclick="window.switchStudentSection('ide')">
+            <span class="subnav-icon">⚡</span>
+            <span>Active Coding IDE</span>
+          </button>
+          <button type="button" class="student-subnav-btn" id="subnav-btn-submissions" onclick="window.switchStudentSection('submissions')">
+            <span class="subnav-icon">📜</span>
+            <span>Submissions & Code History</span>
+            <span class="student-subnav-badge" id="student-nav-count">0</span>
+          </button>
+          <button type="button" class="student-subnav-btn" id="subnav-btn-contests" onclick="window.switchStudentSection('contests')">
+            <span class="subnav-icon">🏆</span>
+            <span>Registered Contests</span>
+          </button>
+        </div>
+
+        <!-- SECTION 1: DASHBOARD OVERVIEW -->
+        <div class="student-section-view hidden" id="student-section-overview">
+          <div class="student-stats-grid">
+            <div class="dash-stat-card">
+              <span class="stat-number text-cyan" id="student-stat-solved">0</span>
+              <span class="stat-label">Problems Solved</span>
             </div>
-            <div class="history-header-ctrls">
-              <button type="button" class="btn-refresh-history" onclick="window.refreshStudentHistory()">
-                <span>↻ Refresh Submissions</span>
+            <div class="dash-stat-card">
+              <span class="stat-number" id="student-stat-total">0</span>
+              <span class="stat-label">Total Submissions</span>
+            </div>
+            <div class="dash-stat-card">
+              <span class="stat-number text-green" id="student-stat-rate">0.0%</span>
+              <span class="stat-label">Acceptance Rate</span>
+            </div>
+            <div class="dash-stat-card">
+              <span class="stat-number text-gold" id="student-stat-streak">Active</span>
+              <span class="stat-label">MongoDB Sync 🔥</span>
+            </div>
+          </div>
+
+          <!-- Quick Navigation Cards to Other Sections -->
+          <div class="student-overview-shortcuts">
+            <div class="shortcut-card" onclick="window.switchStudentSection('ide')">
+              <div class="shortcut-icon-box cyan-glow">⚡</div>
+              <div class="shortcut-content">
+                <span class="shortcut-tag">CODE EXECUTION</span>
+                <h4>Launch Coding IDE Workspace</h4>
+                <p>Sandboxed compiler with C++, Python, Java & JS runtimes.</p>
+              </div>
+              <span class="shortcut-arrow">→</span>
+            </div>
+
+            <div class="shortcut-card" onclick="window.switchStudentSection('submissions')">
+              <div class="shortcut-icon-box blue-glow">📜</div>
+              <div class="shortcut-content">
+                <span class="shortcut-tag">PERSISTENT DB</span>
+                <h4>Submissions & Code History</h4>
+                <p>Inspect past verdicts, runtimes, memory metrics and source code.</p>
+              </div>
+              <span class="shortcut-arrow">→</span>
+            </div>
+
+            <div class="shortcut-card" onclick="window.switchStudentSection('contests')">
+              <div class="shortcut-icon-box gold-glow">🏆</div>
+              <div class="shortcut-content">
+                <span class="shortcut-tag">COMPETITIVE ARENA</span>
+                <h4>Registered Contests</h4>
+                <p>View upcoming rounds, leaderboards and speedrun challenges.</p>
+              </div>
+              <span class="shortcut-arrow">→</span>
+            </div>
+          </div>
+
+          <!-- Recent Submissions Overview Preview -->
+          <div class="student-recent-preview-card">
+            <div class="preview-card-header">
+              <div class="preview-title-group">
+                <span class="preview-icon">⚡</span>
+                <div>
+                  <h4 class="preview-title">Recent Activity</h4>
+                  <span class="preview-sub">Latest problem evaluation runs</span>
+                </div>
+              </div>
+              <button type="button" class="btn-jump-to-section" onclick="window.switchStudentSection('submissions')">
+                <span>View Full Submissions Section →</span>
               </button>
             </div>
-          </div>
-
-          <div class="telemetry-table-wrapper student-history-wrapper">
-            <table class="telemetry-table student-sub-table">
-              <thead>
-                <tr>
-                  <th>SUBMISSION ID</th>
-                  <th>PROBLEM</th>
-                  <th>LANG</th>
-                  <th>RUNTIME</th>
-                  <th>MEMORY</th>
-                  <th>VERDICT</th>
-                  <th>SUBMITTED</th>
-                  <th>CODE</th>
-                </tr>
-              </thead>
-              <tbody id="student-history-table-body">
-                <tr><td colspan="8" style="text-align: center; color: var(--text-tertiary); padding: 24px;">Loading submissions from MongoDB...</td></tr>
-              </tbody>
-            </table>
+            <div class="telemetry-table-wrapper" style="margin-bottom:0;">
+              <table class="telemetry-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>PROBLEM</th>
+                    <th>LANG</th>
+                    <th>RUNTIME</th>
+                    <th>VERDICT</th>
+                    <th>SUBMITTED</th>
+                  </tr>
+                </thead>
+                <tbody id="student-overview-recent-body">
+                  <tr><td colspan="6" style="text-align: center; color: var(--text-tertiary); padding: 18px;">Loading recent submissions...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <div class="dash-action-row">
-          <button type="button" class="btn-dash-primary" onclick="window.scrollToStudentIDE()">
-            <span>Active Coding IDE Workspace ↓</span>
-          </button>
-          <a href="/#arena-section" class="btn-dash-secondary">
-            <span>View Registered Contests</span>
-          </a>
+        <!-- SECTION 2: DEDICATED SUBMISSIONS & CODE HISTORY SECTION -->
+        <div class="student-section-view hidden" id="student-section-submissions">
+          <div class="student-history-card dedicated-section">
+            <div class="student-history-header">
+              <div class="history-title-group">
+                <span class="history-icon">📜</span>
+                <div>
+                  <h3 class="student-history-heading">Submissions & Code History</h3>
+                  <span class="db-live-tag"><span class="pulse-indicator-cyan"></span> STORED IN MONGODB DATABASE</span>
+                </div>
+              </div>
+              <div class="history-header-ctrls">
+                <button type="button" class="btn-refresh-history" onclick="window.refreshStudentHistory()">
+                  <span>↻ Refresh Submissions</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Enhanced Filter & Search Toolbar -->
+            <div class="submissions-toolbar">
+              <div class="sub-search-wrapper">
+                <span class="sub-search-icon">🔍</span>
+                <input type="text" id="sub-search-input" class="sub-search-input" placeholder="Search by problem name or submission ID..." oninput="window.filterStudentSubmissions()">
+              </div>
+              <div class="verdict-filter-chips">
+                <button type="button" class="filter-chip active" data-verdict="ALL" onclick="window.setStudentVerdictFilter('ALL', this)">ALL</button>
+                <button type="button" class="filter-chip" data-verdict="ACCEPTED" onclick="window.setStudentVerdictFilter('ACCEPTED', this)">ACCEPTED</button>
+                <button type="button" class="filter-chip" data-verdict="WRONG ANSWER" onclick="window.setStudentVerdictFilter('WRONG ANSWER', this)">WRONG ANSWER</button>
+                <button type="button" class="filter-chip" data-verdict="TIME LIMIT EXCEEDED" onclick="window.setStudentVerdictFilter('TIME LIMIT EXCEEDED', this)">TLE</button>
+                <button type="button" class="filter-chip" data-verdict="COMPILATION ERROR" onclick="window.setStudentVerdictFilter('COMPILATION ERROR', this)">CE</button>
+              </div>
+            </div>
+
+            <!-- Submissions Table -->
+            <div class="telemetry-table-wrapper student-history-wrapper dedicated-table-wrapper">
+              <table class="telemetry-table student-sub-table">
+                <thead>
+                  <tr>
+                    <th>SUBMISSION ID</th>
+                    <th>PROBLEM</th>
+                    <th>LANG</th>
+                    <th>RUNTIME</th>
+                    <th>MEMORY</th>
+                    <th>VERDICT</th>
+                    <th>SUBMITTED</th>
+                    <th>CODE</th>
+                  </tr>
+                </thead>
+                <tbody id="student-history-table-body">
+                  <tr><td colspan="8" style="text-align: center; color: var(--text-tertiary); padding: 24px;">Loading submissions from MongoDB...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section Action Row with Exact Buttons from Screenshot -->
+          <div class="dash-action-row">
+            <button type="button" class="btn-dash-primary" onclick="window.switchStudentSection('ide')">
+              <span>Active Coding IDE Workspace ↓</span>
+            </button>
+            <button type="button" class="btn-dash-secondary" onclick="window.switchStudentSection('contests')">
+              <span>View Registered Contests</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 3: REGISTERED CONTESTS SECTION -->
+        <div class="student-section-view hidden" id="student-section-contests">
+          <div class="contests-section-header">
+            <div class="contests-title-group">
+              <span class="contests-icon">🏆</span>
+              <div>
+                <h3 class="contests-heading">Registered & Live Contests</h3>
+                <span class="contests-sub">Competitive programming rounds, speedruns & algorithmic challenges</span>
+              </div>
+            </div>
+            <button type="button" class="btn-refresh-history" onclick="window.showJudgeToast('Contest schedules synced with contest gateway.', '🏆')">
+              <span>↻ Refresh Arena</span>
+            </button>
+          </div>
+
+          <div class="contests-grid">
+            <div class="contest-card live-card">
+              <div class="contest-card-badge live">● LIVE NOW</div>
+              <h4 class="contest-name">JudgeX Global Biweekly #42</h4>
+              <p class="contest-desc">4 Algorithmic challenges (Greedy, Segment Trees, Dynamic Programming). Sandboxed MinGW & CPython runtimes.</p>
+              <div class="contest-meta-row">
+                <span class="c-meta-item">⏱ 1h 42m remaining</span>
+                <span class="c-meta-item">👥 1,842 Competitors</span>
+                <span class="c-meta-item">🏆 Global Rating +35</span>
+              </div>
+              <div class="contest-actions">
+                <button type="button" class="btn-enter-contest" onclick="window.switchStudentSection('ide')">Enter Contest Arena ⚡</button>
+              </div>
+            </div>
+
+            <div class="contest-card upcoming-card">
+              <div class="contest-card-badge registered">✓ REGISTERED</div>
+              <h4 class="contest-name">University ACM-ICPC Preliminary Round</h4>
+              <p class="contest-desc">Collegiate team division tournament. ICPC penalty scoring rules with hidden automated stress tests.</p>
+              <div class="contest-meta-row">
+                <span class="c-meta-item">📅 Tomorrow at 18:00 IST</span>
+                <span class="c-meta-item">⏳ 3 Hours Duration</span>
+                <span class="c-meta-item">🎖 University Ranking</span>
+              </div>
+              <div class="contest-actions">
+                <button type="button" class="btn-enter-contest btn-secondary-contest" onclick="window.showJudgeToast('Reminder set for ICPC Preliminary round!', '⏰')">View Instructions 📋</button>
+              </div>
+            </div>
+
+            <div class="contest-card">
+              <div class="contest-card-badge open">OPEN REGISTRATION</div>
+              <h4 class="contest-name">Algorithmic Speed Run: Graph Theory & BFS/DFS</h4>
+              <p class="contest-desc">Short 60-minute sprint problem set focused on graph traversals, topological sort, and Dijkstra's algorithm.</p>
+              <div class="contest-meta-row">
+                <span class="c-meta-item">📅 Saturday at 20:00 IST</span>
+                <span class="c-meta-item">⏳ 60 Mins</span>
+                <span class="c-meta-item">🎯 Fast-Pass Practice</span>
+              </div>
+              <div class="contest-actions">
+                <button type="button" class="btn-enter-contest btn-secondary-contest" onclick="window.showJudgeToast('Registered for Graph Speed Run!', '✓')">Register Now ➔</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-action-row" style="margin-top: 20px;">
+            <button type="button" class="btn-dash-primary" onclick="window.switchStudentSection('ide')">
+              <span>Active Coding IDE Workspace ↓</span>
+            </button>
+            <button type="button" class="btn-dash-secondary" onclick="window.switchStudentSection('submissions')">
+              <span>View Submissions & Code History 📜</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -536,6 +716,12 @@
             <span><strong>STUDENT WORKSPACE IDE</strong> // Submissions evaluated & recorded</span>
           </div>
           <div class="student-ide-banner-right">
+            <button type="button" class="btn-ide-subnav-jump" onclick="window.switchStudentSection('submissions')" title="Open Submissions & Code History section">
+              <span>📜 My Submissions</span>
+            </button>
+            <button type="button" class="btn-ide-subnav-jump" onclick="window.switchStudentSection('overview')" title="Open Dashboard Overview">
+              <span>📊 Overview</span>
+            </button>
             <span class="text-cyan font-mono" id="ide-student-roll-badge">ROLL: 0863CS221045</span>
           </div>
         </div>
@@ -1062,6 +1248,6 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-  <script src="/login.js?v=10"></script>
+  <script src="/login.js?v=11"></script>
 </body>
 </html>

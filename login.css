@@ -1991,3 +1991,502 @@ select option:checked {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
 }
+
+/* ==========================================================================
+   STUDENT PORTAL SECTION SWITCHER & DEDICATED SUBMISSIONS VIEW
+   ========================================================================== */
+
+.student-portal-subnav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(8, 11, 20, 0.85);
+  border: 1px solid rgba(0, 214, 255, 0.18);
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  overflow-x: auto;
+}
+
+.student-subnav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.student-subnav-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.student-subnav-btn.active {
+  background: linear-gradient(135deg, rgba(0, 119, 255, 0.25), rgba(0, 214, 255, 0.18));
+  border-color: rgba(0, 214, 255, 0.45);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 214, 255, 0.22);
+}
+
+.student-subnav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 214, 255, 0.2);
+  border: 1px solid rgba(0, 214, 255, 0.4);
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  min-width: 20px;
+}
+
+.student-section-view {
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Dedicated Submissions Section & Header Enhancements */
+.student-history-card.dedicated-section {
+  background: rgba(12, 16, 26, 0.85);
+  border: 1px solid rgba(0, 214, 255, 0.25);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.submissions-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.sub-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.sub-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.sub-search-input {
+  width: 100%;
+  background: rgba(7, 10, 18, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 9px 12px 9px 36px;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  transition: all 0.2s;
+}
+
+.sub-search-input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 14px rgba(0, 214, 255, 0.25);
+  background: rgba(7, 10, 18, 0.95);
+}
+
+.verdict-filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.filter-chip.active {
+  background: rgba(0, 214, 255, 0.15);
+  border-color: rgba(0, 214, 255, 0.45);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 214, 255, 0.2);
+}
+
+.dedicated-table-wrapper {
+  max-height: 480px;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Overview Shortcuts Cards */
+.student-overview-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.shortcut-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(14, 18, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.shortcut-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 214, 255, 0.35);
+  background: rgba(18, 24, 40, 0.85);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 214, 255, 0.12);
+}
+
+.shortcut-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.shortcut-icon-box.cyan-glow {
+  background: rgba(0, 214, 255, 0.12);
+  border: 1px solid rgba(0, 214, 255, 0.3);
+  color: var(--accent-cyan);
+}
+
+.shortcut-icon-box.blue-glow {
+  background: rgba(0, 119, 255, 0.14);
+  border: 1px solid rgba(0, 119, 255, 0.3);
+  color: #38bdf8;
+}
+
+.shortcut-icon-box.gold-glow {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.shortcut-content {
+  flex: 1;
+}
+
+.shortcut-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+.shortcut-content h4 {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 3px 0 4px 0;
+}
+
+.shortcut-content p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.shortcut-arrow {
+  color: var(--text-tertiary);
+  font-size: 1.1rem;
+  transition: transform 0.2s;
+}
+
+.shortcut-card:hover .shortcut-arrow {
+  transform: translateX(4px);
+  color: var(--accent-cyan);
+}
+
+/* Recent Activity Preview Card in Overview */
+.student-recent-preview-card {
+  background: rgba(14, 18, 30, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.preview-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preview-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.preview-icon {
+  font-size: 1.2rem;
+}
+
+.preview-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.preview-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.btn-jump-to-section {
+  background: rgba(0, 214, 255, 0.08);
+  border: 1px solid rgba(0, 214, 255, 0.25);
+  border-radius: 8px;
+  color: var(--accent-cyan);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-jump-to-section:hover {
+  background: var(--accent-cyan);
+  color: #000000;
+  box-shadow: 0 0 14px var(--accent-cyan-glow);
+}
+
+/* Registered Contests Section */
+.contests-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.contests-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contests-icon {
+  font-size: 1.6rem;
+}
+
+.contests-heading {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.contests-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.contests-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.contest-card {
+  position: relative;
+  background: rgba(14, 18, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s;
+}
+
+.contest-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.contest-card.live-card {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.12);
+}
+
+.contest-card.upcoming-card {
+  border-color: rgba(0, 214, 255, 0.3);
+}
+
+.contest-card-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.contest-card-badge.live {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.contest-card-badge.registered {
+  background: rgba(0, 214, 255, 0.15);
+  border: 1px solid rgba(0, 214, 255, 0.4);
+  color: var(--accent-cyan);
+}
+
+.contest-card-badge.open {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-tertiary);
+}
+
+.contest-name {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.contest-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0 0 16px 0;
+  flex: 1;
+}
+
+.contest-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+
+.c-meta-item {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.btn-enter-contest {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent-blue), #0077ff);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-enter-contest:hover {
+  box-shadow: 0 0 16px var(--accent-blue-glow);
+  transform: translateY(-1px);
+}
+
+.btn-secondary-contest {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+.btn-secondary-contest:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* Quick Jump from inside IDE */
+.btn-ide-subnav-jump {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 214, 255, 0.25);
+  color: var(--accent-cyan);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 8px;
+}
+
+.btn-ide-subnav-jump:hover {
+  background: rgba(0, 214, 255, 0.15);
+  border-color: var(--accent-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(0, 214, 255, 0.25);
+}
+
+@media (max-width: 900px) {
+  .student-overview-shortcuts,
+  .contests-grid {
+    grid-template-columns: 1fr;
+  }
+}

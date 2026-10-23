@@ -105,10 +105,14 @@
       if (isStudentLoggedIn && studentDashboard && !studentDashboard.classList.contains('hidden')) {
         if (studentCard) studentCard.classList.add('hidden');
         if (studentDashboard) studentDashboard.classList.remove('hidden');
-        if (ideWorkbenchSection) ideWorkbenchSection.classList.remove('hidden');
-        if (guestIdeBanner) guestIdeBanner.classList.add('hidden');
-        if (studentIdeBanner) studentIdeBanner.classList.remove('hidden');
-        if (authCardWrapper) authCardWrapper.classList.add('expanded-ide');
+        if (typeof window.switchStudentSection === 'function') {
+          window.switchStudentSection(activeStudentSection || 'ide');
+        } else {
+          if (ideWorkbenchSection) ideWorkbenchSection.classList.remove('hidden');
+          if (guestIdeBanner) guestIdeBanner.classList.add('hidden');
+          if (studentIdeBanner) studentIdeBanner.classList.remove('hidden');
+          if (authCardWrapper) authCardWrapper.classList.add('expanded-ide');
+        }
         if (typeof initMonacoEditor === 'function') {
           initMonacoEditor();
           setTimeout(() => { if (monacoInstance) monacoInstance.layout(); }, 60);
@@ -194,6 +198,69 @@
     return null;
   }
 
+  let activeStudentSection = 'ide';
+  window._studentSubmissions = [];
+  window._currentVerdictFilter = 'ALL';
+
+  window.switchStudentSection = function (sectionName) {
+    activeStudentSection = sectionName || 'ide';
+
+    // Update section subnav buttons
+    const btnOverview = document.getElementById('subnav-btn-overview');
+    const btnIde = document.getElementById('subnav-btn-ide');
+    const btnSubs = document.getElementById('subnav-btn-submissions');
+    const btnContests = document.getElementById('subnav-btn-contests');
+
+    [btnOverview, btnIde, btnSubs, btnContests].forEach(b => {
+      if (b) b.classList.remove('active');
+    });
+
+    if (sectionName === 'overview' && btnOverview) btnOverview.classList.add('active');
+    if (sectionName === 'ide' && btnIde) btnIde.classList.add('active');
+    if (sectionName === 'submissions' && btnSubs) btnSubs.classList.add('active');
+    if (sectionName === 'contests' && btnContests) btnContests.classList.add('active');
+
+    // Section views inside student-dashboard
+    const viewOverview = document.getElementById('student-section-overview');
+    const viewSubs = document.getElementById('student-section-submissions');
+    const viewContests = document.getElementById('student-section-contests');
+
+    if (viewOverview) viewOverview.classList.add('hidden');
+    if (viewSubs) viewSubs.classList.add('hidden');
+    if (viewContests) viewContests.classList.add('hidden');
+
+    if (sectionName === 'ide') {
+      if (ideWorkbenchSection) ideWorkbenchSection.classList.remove('hidden');
+      if (guestIdeBanner) guestIdeBanner.classList.add('hidden');
+      if (studentIdeBanner) studentIdeBanner.classList.remove('hidden');
+      if (authCardWrapper) authCardWrapper.classList.add('expanded-ide');
+
+      if (typeof initMonacoEditor === 'function') {
+        initMonacoEditor();
+        setTimeout(() => { if (monacoInstance) monacoInstance.layout(); }, 60);
+      }
+      setTimeout(() => {
+        const editor = document.getElementById('code-editor');
+        if (editor) editor.focus();
+      }, 100);
+    } else {
+      if (ideWorkbenchSection) ideWorkbenchSection.classList.add('hidden');
+      if (authCardWrapper) authCardWrapper.classList.remove('expanded-ide');
+
+      if (sectionName === 'overview') {
+        if (viewOverview) viewOverview.classList.remove('hidden');
+        const session = getCurrentStudentSession();
+        window.loadStudentStats(session ? session.roll : null);
+        window.renderRecentSubmissionsOverview();
+      } else if (sectionName === 'submissions') {
+        if (viewSubs) viewSubs.classList.remove('hidden');
+        window.renderFilteredStudentHistory();
+      } else if (sectionName === 'contests') {
+        if (viewContests) viewContests.classList.remove('hidden');
+      }
+    }
+  };
+
   function showStudentWorkspace(sessionData) {
     if (studentCard) studentCard.classList.add('hidden');
     if (studentDashboard) {
@@ -204,17 +271,12 @@
       if (rollEl && sessionData.roll) rollEl.textContent = `STUDENT // ROLL: ${sessionData.roll}`;
     }
 
-    if (ideWorkbenchSection) ideWorkbenchSection.classList.remove('hidden');
-    if (guestIdeBanner) guestIdeBanner.classList.add('hidden');
-    if (studentIdeBanner) studentIdeBanner.classList.remove('hidden');
     const ideRollBadge = document.getElementById('ide-student-roll-badge');
     if (ideRollBadge && sessionData.roll) ideRollBadge.textContent = `ROLL: ${sessionData.roll}`;
-    if (authCardWrapper) authCardWrapper.classList.add('expanded-ide');
 
-    if (typeof initMonacoEditor === 'function') {
-      initMonacoEditor();
-      setTimeout(() => { if (monacoInstance) monacoInstance.layout(); }, 60);
-    }
+    window.switchStudentSection('ide');
+    window.loadStudentHistory(sessionData.roll);
+    window.loadStudentStats(sessionData.roll);
   }
 
   // --- Form Handlers Connected to MongoDB Database ---
@@ -422,6 +484,7 @@
   };
 
   window.scrollToStudentIDE = function () {
+    window.switchStudentSection('ide');
     if (ideWorkbenchSection) {
       ideWorkbenchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       const editor = document.getElementById('code-editor');
@@ -2142,58 +2205,151 @@ int main() {
   }
 
   window.loadStudentHistory = async function (roll) {
-    const tbody = document.getElementById('student-history-table-body');
-    if (!tbody) return;
-
     const currentSession = getCurrentStudentSession();
     const targetRoll = roll || (currentSession ? currentSession.roll : '0863CS221045');
 
     try {
-      const res = await fetch(`/api/submissions/student?roll=${encodeURIComponent(targetRoll)}&limit=50`);
+      const res = await fetch(`/api/submissions/student?roll=${encodeURIComponent(targetRoll)}&limit=100`);
       const data = await res.json();
 
-      if (!data.success || !data.submissions || !data.submissions.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8" style="text-align: center; color: var(--text-tertiary); padding: 28px;">
-              No submissions recorded yet for roll <strong>${escapeHtml(targetRoll)}</strong> in MongoDB.<br>
-              Write your code in the IDE below and click <strong>"⚡ Submit Code"</strong>!
-            </td>
-          </tr>
-        `;
-        return;
+      if (data.success && data.submissions) {
+        window._studentSubmissions = data.submissions;
+      } else {
+        window._studentSubmissions = [];
       }
 
-      tbody.innerHTML = data.submissions.map(s => {
-        let tagClass = 'tag-ac';
-        if (s.verdict === 'WRONG ANSWER' || s.verdict === 'WRONG_ANSWER') tagClass = 'tag-wa';
-        else if (s.verdict === 'TIME LIMIT EXCEEDED' || s.verdict === 'TIME_LIMIT_EXCEEDED') tagClass = 'tag-tle';
-        else if (s.verdict === 'COMPILATION ERROR' || s.verdict === 'COMPILATION_ERROR') tagClass = 'tag-ce';
-        else if (s.verdict === 'RUNTIME ERROR' || s.verdict === 'RUNTIME_ERROR') tagClass = 'tag-wa';
+      // Update counter badge
+      const countBadge = document.getElementById('student-nav-count');
+      if (countBadge) countBadge.textContent = window._studentSubmissions.length;
 
-        const timeStr = formatTimeAgo(s.createdAt);
+      const totalEl = document.getElementById('student-stat-total');
+      if (totalEl && window._studentSubmissions.length) {
+        totalEl.textContent = window._studentSubmissions.length;
+      }
 
-        return `
-          <tr>
-            <td style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">#${s.submissionId || '—'}</td>
-            <td style="font-weight: 600;">${escapeHtml(s.problemTitle || s.problemKey)}</td>
-            <td style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">${escapeHtml(s.language)}</td>
-            <td style="font-family: var(--font-mono);">${s.runtimeMs}ms</td>
-            <td style="font-family: var(--font-mono); color: var(--text-secondary);">${s.memoryMb} MB</td>
-            <td><span class="verdict-tag ${tagClass}">${s.verdict}</span></td>
-            <td style="font-family: var(--font-mono); color: var(--text-tertiary); font-size: 0.75rem;">${timeStr}</td>
-            <td>
-              <button type="button" class="btn-inspect-row" onclick="window.viewStudentSubmission('${s._id || s.submissionId}')">
-                View Code
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      window.renderFilteredStudentHistory();
+      window.renderRecentSubmissionsOverview();
     } catch (err) {
       console.error('Error fetching student history:', err);
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 20px;">Could not load submission history from MongoDB.</td></tr>`;
+      const tbody = document.getElementById('student-history-table-body');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 20px;">Could not load submission history from MongoDB.</td></tr>`;
+      }
     }
+  };
+
+  window.renderFilteredStudentHistory = function () {
+    const tbody = document.getElementById('student-history-table-body');
+    if (!tbody) return;
+
+    const list = window._studentSubmissions || [];
+    const searchInput = document.getElementById('sub-search-input');
+    const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+    const activeFilter = window._currentVerdictFilter || 'ALL';
+
+    const filtered = list.filter(s => {
+      // Verdict match
+      if (activeFilter !== 'ALL') {
+        const v = (s.verdict || '').toUpperCase();
+        if (activeFilter === 'ACCEPTED' && !v.includes('ACCEPT')) return false;
+        if (activeFilter === 'WRONG ANSWER' && !v.includes('WRONG')) return false;
+        if (activeFilter === 'TIME LIMIT EXCEEDED' && !v.includes('TIME') && !v.includes('TLE')) return false;
+        if (activeFilter === 'COMPILATION ERROR' && !v.includes('COMPIL') && !v.includes('CE')) return false;
+      }
+
+      // Text search match
+      if (query) {
+        const title = (s.problemTitle || s.problemKey || '').toLowerCase();
+        const subId = String(s.submissionId || '').toLowerCase();
+        const lang = (s.language || '').toLowerCase();
+        if (!title.includes(query) && !subId.includes(query) && !lang.includes(query)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    if (!filtered.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; color: var(--text-tertiary); padding: 28px;">
+            No submissions found matching criteria.<br>
+            <span style="font-size: 0.8rem; color: rgba(255,255,255,0.4);">Try adjusting search query or filter tags.</span>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(s => {
+      let tagClass = 'tag-ac';
+      if (s.verdict === 'WRONG ANSWER' || s.verdict === 'WRONG_ANSWER') tagClass = 'tag-wa';
+      else if (s.verdict === 'TIME LIMIT EXCEEDED' || s.verdict === 'TIME_LIMIT_EXCEEDED') tagClass = 'tag-tle';
+      else if (s.verdict === 'COMPILATION ERROR' || s.verdict === 'COMPILATION_ERROR') tagClass = 'tag-ce';
+      else if (s.verdict === 'RUNTIME ERROR' || s.verdict === 'RUNTIME_ERROR') tagClass = 'tag-wa';
+
+      const timeStr = formatTimeAgo(s.createdAt);
+
+      return `
+        <tr>
+          <td style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">#${s.submissionId || '—'}</td>
+          <td style="font-weight: 600;">${escapeHtml(s.problemTitle || s.problemKey)}</td>
+          <td style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">${escapeHtml(s.language)}</td>
+          <td style="font-family: var(--font-mono);">${s.runtimeMs}ms</td>
+          <td style="font-family: var(--font-mono); color: var(--text-secondary);">${s.memoryMb} MB</td>
+          <td><span class="verdict-tag ${tagClass}">${s.verdict}</span></td>
+          <td style="font-family: var(--font-mono); color: var(--text-tertiary); font-size: 0.75rem;">${timeStr}</td>
+          <td>
+            <button type="button" class="btn-inspect-row" onclick="window.viewStudentSubmission('${s._id || s.submissionId}')">
+              View Code
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  };
+
+  window.renderRecentSubmissionsOverview = function () {
+    const tbody = document.getElementById('student-overview-recent-body');
+    if (!tbody) return;
+
+    const list = (window._studentSubmissions || []).slice(0, 4);
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-tertiary); padding: 16px;">No recent submissions yet. Open Coding IDE to solve your first problem!</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(s => {
+      let tagClass = 'tag-ac';
+      if (s.verdict === 'WRONG ANSWER' || s.verdict === 'WRONG_ANSWER') tagClass = 'tag-wa';
+      else if (s.verdict === 'TIME LIMIT EXCEEDED' || s.verdict === 'TIME_LIMIT_EXCEEDED') tagClass = 'tag-tle';
+      else if (s.verdict === 'COMPILATION ERROR' || s.verdict === 'COMPILATION_ERROR') tagClass = 'tag-ce';
+      else if (s.verdict === 'RUNTIME ERROR' || s.verdict === 'RUNTIME_ERROR') tagClass = 'tag-wa';
+
+      return `
+        <tr>
+          <td style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">#${s.submissionId || '—'}</td>
+          <td style="font-weight: 600;">${escapeHtml(s.problemTitle || s.problemKey)}</td>
+          <td style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">${escapeHtml(s.language)}</td>
+          <td style="font-family: var(--font-mono);">${s.runtimeMs}ms</td>
+          <td><span class="verdict-tag ${tagClass}">${s.verdict}</span></td>
+          <td style="font-family: var(--font-mono); color: var(--text-tertiary); font-size: 0.75rem;">${formatTimeAgo(s.createdAt)}</td>
+        </tr>
+      `;
+    }).join('');
+  };
+
+  window.setStudentVerdictFilter = function (verdict, btnEl) {
+    window._currentVerdictFilter = verdict || 'ALL';
+    const chips = document.querySelectorAll('.verdict-filter-chips .filter-chip');
+    chips.forEach(c => c.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    window.renderFilteredStudentHistory();
+  };
+
+  window.filterStudentSubmissions = function () {
+    window.renderFilteredStudentHistory();
   };
 
   window.refreshStudentHistory = function () {
