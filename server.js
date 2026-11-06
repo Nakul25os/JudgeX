@@ -93,8 +93,69 @@ function runProcess(cmd, args, inputStr, timeoutMs, cwd) {
   });
 }
 
+// Helper functions for parsing test case arguments and evaluating verdicts
+function parseInputToArgs(inputStr) {
+  if (!inputStr || !inputStr.trim()) return [];
+  const vars = [];
+  const parts = inputStr.split(/,\s*(?=[a-zA-Z_][a-zA-Z0-9_]*\s*=)/);
+  for (const part of parts) {
+    const eqIdx = part.indexOf('=');
+    if (eqIdx !== -1) {
+      const varName = part.substring(0, eqIdx).trim();
+      const val = part.substring(eqIdx + 1).trim();
+      vars.push({ name: varName, val: val });
+    } else {
+      vars.push({ name: 'arg' + vars.length, val: part.trim() });
+    }
+  }
+  return vars;
+}
+
+function cppFormatArg(val) {
+  val = (val || '').trim();
+  if (val.startsWith('[') && val.endsWith(']')) {
+    return '{' + val.slice(1, -1) + '}';
+  }
+  return val;
+}
+
+function extractMethodInfo(code) {
+  const match = (code || '').match(/(?:bool|int|string|vector\s*<[^>]+>|double|long\s+long|ListNode\*|void)\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/);
+  if (match) {
+    return { name: match[1], params: match[2] };
+  }
+  return null;
+}
+
+function parseCppParams(paramsStr) {
+  if (!paramsStr || !paramsStr.trim()) return [];
+  const params = [];
+  const parts = paramsStr.split(/,\s*(?![^<]*>)/);
+  for (const part of parts) {
+    const trimmed = part.trim();
+    const lastSpace = trimmed.lastIndexOf(' ');
+    if (lastSpace !== -1) {
+      let type = trimmed.substring(0, lastSpace).trim().replace(/&/g, '').trim();
+      let name = trimmed.substring(lastSpace + 1).trim().replace(/[*&]/g, '');
+      params.push({ type, name });
+    } else {
+      params.push({ type: 'auto', name: trimmed });
+    }
+  }
+  return params;
+}
+
+function normalizeJudgeOutput(val) {
+  if (val === null || val === undefined) return '';
+  return String(val)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/["']/g, '');
+}
+
 // Real compiler & sandboxed execution engine for Python, C++, C, Java, JavaScript
-async function executeCodeEngine(language, code, stdin = '') {
+async function executeCodeEngine(language, code, stdin = '', testCases = [], problemKey = '', problemTitle = '') {
   const tmpDir = path.join(os.tmpdir(), 'judgex_run_' + Date.now() + '_' + Math.random().toString(36).slice(2));
   fs.mkdirSync(tmpDir, { recursive: true });
 
@@ -103,10 +164,152 @@ async function executeCodeEngine(language, code, stdin = '') {
   try {
     const lang = (language || '').toLowerCase().trim();
 
+    // Check if code has no solution logic implemented
+    const cleanCheck = (code || '')
+      .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+      .replace(/#.*/g, '')
+      .replace(/\s+/g, '');
+
+    const hasLogic = /\b(return|if|for|while|do|switch|cout|printf|System\.out|console\.log|[a-zA-Z0-9_]+\s*=[^=])\b/.test(
+      (code || '').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+    );
+
+    if (!code || !code.trim() || cleanCheck.length < 15 || !hasLogic) {
+      return {
+        success: false,
+        status: 'NOT_IMPLEMENTED',
+        stdout: '',
+        stderr: 'No solution logic implemented inside function stub. Please write your algorithm logic first.',
+        runtimeMs: 0,
+        memoryMb: memMb,
+        compiler: 'JudgeX Native Core',
+        exitCode: 0,
+        passedCases: 0,
+        totalCases: Array.isArray(testCases) && testCases.length > 0 ? testCases.length : 0
+      };
+    }
+
     if (lang === 'python') {
+      let finalCode = code;
+      const isLeetCodeClass = code.includes('class Solution');
+      const hasTestCases = Array.isArray(testCases) && testCases.length > 0;
+
+      if (isLeetCodeClass && hasTestCases && !finalCode.includes('if __name__')) {
+        const pyRunner = `
+from typing import List, Optional, Dict, Set, Tuple
+import json, re
+
+${finalCode}
+
+if __name__ == "__main__":
+    sol = Solution()
+    methods = [m for m in dir(sol) if not m.startswith('_') and callable(getattr(sol, m))]
+    fn = getattr(sol, methods[0]) if methods else None
+    test_cases = ${JSON.stringify(testCases)}
+    for idx, tc in enumerate(test_cases):
+        print(f"---JUDGEX_TC_START:{idx}---")
+        try:
+            scope = {}
+            parts = re.split(r',\\s*(?=[a-zA-Z_][a-zA-Z0-9_]*\\s*=)', tc.get('input', ''))
+            for p in parts:
+                if '=' in p:
+                    k, v = p.split('=', 1)
+                    scope[k.strip()] = eval(v.strip())
+                elif p.strip():
+                    scope[f'arg{len(scope)}'] = eval(p.strip())
+            res = fn(*scope.values()) if fn else None
+            if isinstance(res, bool):
+                out = "true" if res else "false"
+            elif isinstance(res, (list, dict)):
+                out = json.dumps(res).replace(' ', '')
+            else:
+                out = str(res)
+            print("OUTPUT:" + out)
+        except Exception as e:
+            print("ERROR:" + str(e))
+        print(f"---JUDGEX_TC_END:{idx}---")
+`;
+        finalCode = pyRunner;
+      } else {
+        if (/:\s*$/.test(finalCode.trim())) {
+          finalCode += '\n        pass\n';
+        }
+        if (!finalCode.includes('def main') && !finalCode.includes('if __name__')) {
+          finalCode = 'from typing import List, Optional, Dict, Set, Tuple\n' + finalCode + '\nif __name__ == "__main__":\n    pass\n';
+        }
+      }
+
       const filePath = path.join(tmpDir, 'solution.py');
-      fs.writeFileSync(filePath, code, 'utf8');
+      fs.writeFileSync(filePath, finalCode, 'utf8');
       const res = await runProcess('python', ['-u', 'solution.py'], stdin, 7000, tmpDir);
+
+      if (isLeetCodeClass && hasTestCases && res.exitCode === 0) {
+        const testCaseResults = [];
+        let allPassed = true;
+        let firstFailed = null;
+        let passedCases = 0;
+
+        for (let idx = 0; idx < testCases.length; idx++) {
+          const tc = testCases[idx];
+          const tcRegex = new RegExp(`---JUDGEX_TC_START:${idx}---[\\r\\n]+([\\s\\S]*?)[\\r\\n]+---JUDGEX_TC_END:${idx}---`);
+          const tcMatch = res.stdout.match(tcRegex);
+          let actualVal = '';
+          let hasError = false;
+
+          if (tcMatch) {
+            const block = tcMatch[1].trim();
+            if (block.startsWith('OUTPUT:')) {
+              actualVal = block.substring(7).trim();
+            } else if (block.startsWith('ERROR:')) {
+              actualVal = block.substring(6).trim();
+              hasError = true;
+            } else {
+              actualVal = block;
+            }
+          } else {
+            actualVal = '(no output / exception)';
+            hasError = true;
+          }
+
+          const passed = !hasError && (normalizeJudgeOutput(actualVal) === normalizeJudgeOutput(tc.expected));
+          if (passed) passedCases++;
+          else {
+            allPassed = false;
+            if (!firstFailed) {
+              firstFailed = {
+                caseNum: idx + 1,
+                input: tc.input,
+                expected: tc.expected,
+                actual: actualVal
+              };
+            }
+          }
+
+          testCaseResults.push({
+            title: tc.title || `Test ${idx + 1}`,
+            input: tc.input,
+            expected: tc.expected,
+            actual: actualVal,
+            passed: passed
+          });
+        }
+
+        return {
+          success: allPassed,
+          status: allPassed ? 'ACCEPTED' : 'WRONG_ANSWER',
+          stdout: testCaseResults.map((r, i) => `Test ${i + 1}: ${r.passed ? 'PASSED' : 'FAILED'}`).join('\n'),
+          stderr: allPassed ? '' : (firstFailed ? `Test Case ${firstFailed.caseNum} Failed: Expected ${firstFailed.expected}, but got ${firstFailed.actual}` : ''),
+          runtimeMs: res.duration,
+          memoryMb: memMb,
+          compiler: 'Python 3.14 (CPython JIT)',
+          exitCode: allPassed ? 0 : 1,
+          passedCases: passedCases,
+          totalCases: testCases.length,
+          firstFailed: firstFailed,
+          testCaseResults: testCaseResults
+        };
+      }
+
       return {
         success: res.exitCode === 0,
         status: res.timedOut ? 'TIME_LIMIT_EXCEEDED' : res.exitCode === 0 ? 'ACCEPTED' : 'RUNTIME_ERROR',
@@ -120,9 +323,96 @@ async function executeCodeEngine(language, code, stdin = '') {
     }
 
     if (lang === 'cpp') {
+      let finalCode = code;
+      const methodInfo = extractMethodInfo(code);
+      const isLeetCodeClass = code.includes('class Solution') && methodInfo && !code.includes('main(');
+      const hasTestCases = Array.isArray(testCases) && testCases.length > 0;
+
+      let headerPrefix = '';
+      if (!finalCode.includes('<iostream>')) headerPrefix += '#include <iostream>\n';
+      if (!finalCode.includes('<vector>')) headerPrefix += '#include <vector>\n';
+      if (!finalCode.includes('<string>')) headerPrefix += '#include <string>\n';
+      if (!finalCode.includes('<algorithm>')) headerPrefix += '#include <algorithm>\n';
+      if (!finalCode.includes('<unordered_map>')) headerPrefix += '#include <unordered_map>\n';
+      if (!finalCode.includes('<unordered_set>')) headerPrefix += '#include <unordered_set>\n';
+      if (!finalCode.includes('<queue>')) headerPrefix += '#include <queue>\n';
+      if (!finalCode.includes('<stack>')) headerPrefix += '#include <stack>\n';
+      if (!finalCode.includes('using namespace std;')) headerPrefix += 'using namespace std;\n';
+
+      if (isLeetCodeClass && hasTestCases) {
+        const formatters = `
+template<typename T> void jxPrint(const T& val) { cout << val; }
+void jxPrint(bool val) { cout << (val ? "true" : "false"); }
+template<typename T> void jxPrint(const vector<T>& vec) {
+    cout << "[";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i > 0) cout << ",";
+        jxPrint(vec[i]);
+    }
+    cout << "]";
+}
+`;
+        const cppParamDefs = parseCppParams(methodInfo.params || '');
+        const sampleCase = (testCases[0] && testCases[0].input) || '';
+        const sampleVars = parseInputToArgs(sampleCase);
+
+        if (sampleVars.length > 0 && cppParamDefs.length !== sampleVars.length) {
+          return {
+            success: false,
+            status: 'WRONG_ANSWER',
+            stdout: '',
+            stderr: `Function Signature Mismatch: Your function '${methodInfo.name}' takes ${cppParamDefs.length} argument(s) (${methodInfo.params || 'none'}), but the active problem expects ${sampleVars.length} argument(s) (${sampleCase}).`,
+            runtimeMs: 0,
+            memoryMb: memMb,
+            compiler: 'g++ (MinGW GCC -O2)',
+            exitCode: 1,
+            passedCases: 0,
+            totalCases: testCases.length,
+            firstFailed: {
+              caseNum: 1,
+              input: sampleCase,
+              expected: (testCases[0] && testCases[0].expected) || 'N/A',
+              actual: `(signature mismatch: function '${methodInfo.name}' takes ${cppParamDefs.length} args, problem takes ${sampleVars.length})`
+            }
+          };
+        }
+
+        let testRunnerBody = `\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    Solution sol;\n`;
+        for (let idx = 0; idx < testCases.length; idx++) {
+          const tc = testCases[idx];
+          const parsedVars = parseInputToArgs(tc.input || '');
+          let varDecls = '';
+          const callArgs = [];
+          for (let vIdx = 0; vIdx < parsedVars.length; vIdx++) {
+            const pDef = cppParamDefs[vIdx] || { type: 'auto' };
+            const pType = pDef.type || 'auto';
+            const rawVal = cppFormatArg(parsedVars[vIdx].val);
+            const varName = `_tc_${idx}_arg_${vIdx}`;
+            varDecls += `        ${pType} ${varName} = ${rawVal};\n`;
+            callArgs.push(varName);
+          }
+          testRunnerBody += `
+    cout << "---JUDGEX_TC_START:${idx}---\\n";
+    try {
+${varDecls}        cout << "OUTPUT:";
+        jxPrint(sol.${methodInfo.name}(${callArgs.join(', ')}));
+        cout << "\\n";
+    } catch (...) {
+        cout << "ERROR:Exception thrown\\n";
+    }
+    cout << "---JUDGEX_TC_END:${idx}---\\n";
+`;
+        }
+        testRunnerBody += `    return 0;\n}\n`;
+        finalCode = headerPrefix + '\n' + formatters + '\n' + finalCode + '\n' + testRunnerBody;
+      } else if (!finalCode.includes('main(')) {
+        const mainHarness = `\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    return 0;\n}\n`;
+        finalCode = headerPrefix + '\n' + finalCode + '\n' + mainHarness;
+      }
+
       const srcPath = path.join(tmpDir, 'solution.cpp');
       const binPath = path.join(tmpDir, 'solution.exe');
-      fs.writeFileSync(srcPath, code, 'utf8');
+      fs.writeFileSync(srcPath, finalCode, 'utf8');
 
       // Compile with GCC C++14 / C++17
       const compile = await runProcess('g++', ['-std=c++14', '-O2', 'solution.cpp', '-o', 'solution.exe'], '', 8000, tmpDir);
@@ -140,6 +430,74 @@ async function executeCodeEngine(language, code, stdin = '') {
       }
 
       const run = await runProcess(binPath, [], stdin, 6000, tmpDir);
+
+      if (isLeetCodeClass && hasTestCases && run.exitCode === 0) {
+        const testCaseResults = [];
+        let allPassed = true;
+        let firstFailed = null;
+        let passedCases = 0;
+
+        for (let idx = 0; idx < testCases.length; idx++) {
+          const tc = testCases[idx];
+          const tcRegex = new RegExp(`---JUDGEX_TC_START:${idx}---[\\r\\n]+([\\s\\S]*?)[\\r\\n]+---JUDGEX_TC_END:${idx}---`);
+          const tcMatch = run.stdout.match(tcRegex);
+          let actualVal = '';
+          let hasError = false;
+
+          if (tcMatch) {
+            const block = tcMatch[1].trim();
+            if (block.startsWith('OUTPUT:')) {
+              actualVal = block.substring(7).trim();
+            } else if (block.startsWith('ERROR:')) {
+              actualVal = block.substring(6).trim();
+              hasError = true;
+            } else {
+              actualVal = block;
+            }
+          } else {
+            actualVal = '(no output / exception)';
+            hasError = true;
+          }
+
+          const passed = !hasError && (normalizeJudgeOutput(actualVal) === normalizeJudgeOutput(tc.expected));
+          if (passed) passedCases++;
+          else {
+            allPassed = false;
+            if (!firstFailed) {
+              firstFailed = {
+                caseNum: idx + 1,
+                input: tc.input,
+                expected: tc.expected,
+                actual: actualVal
+              };
+            }
+          }
+
+          testCaseResults.push({
+            title: tc.title || `Test ${idx + 1}`,
+            input: tc.input,
+            expected: tc.expected,
+            actual: actualVal,
+            passed: passed
+          });
+        }
+
+        return {
+          success: allPassed,
+          status: allPassed ? 'ACCEPTED' : 'WRONG_ANSWER',
+          stdout: testCaseResults.map((r, i) => `Test ${i + 1}: ${r.passed ? 'PASSED' : 'FAILED'}`).join('\n'),
+          stderr: allPassed ? '' : (firstFailed ? `Test Case ${firstFailed.caseNum} Failed: Expected ${firstFailed.expected}, but got ${firstFailed.actual}` : ''),
+          runtimeMs: run.duration,
+          memoryMb: memMb,
+          compiler: 'g++ (MinGW GCC -O2)',
+          exitCode: allPassed ? 0 : 1,
+          passedCases: passedCases,
+          totalCases: testCases.length,
+          firstFailed: firstFailed,
+          testCaseResults: testCaseResults
+        };
+      }
+
       return {
         success: run.exitCode === 0,
         status: run.timedOut ? 'TIME_LIMIT_EXCEEDED' : run.exitCode === 0 ? 'ACCEPTED' : 'RUNTIME_ERROR',
@@ -153,9 +511,21 @@ async function executeCodeEngine(language, code, stdin = '') {
     }
 
     if (lang === 'c') {
+      let finalCode = code;
+      if (!finalCode.includes('main(')) {
+        let headerPrefix = '';
+        if (!finalCode.includes('<stdio.h>')) headerPrefix += '#include <stdio.h>\n';
+        if (!finalCode.includes('<stdlib.h>')) headerPrefix += '#include <stdlib.h>\n';
+        if (!finalCode.includes('<string.h>')) headerPrefix += '#include <string.h>\n';
+        if (!finalCode.includes('<stdbool.h>')) headerPrefix += '#include <stdbool.h>\n';
+
+        const mainHarness = `\nint main() {\n    return 0;\n}\n`;
+        finalCode = headerPrefix + '\n' + finalCode + '\n' + mainHarness;
+      }
+
       const srcPath = path.join(tmpDir, 'solution.c');
       const binPath = path.join(tmpDir, 'solution.exe');
-      fs.writeFileSync(srcPath, code, 'utf8');
+      fs.writeFileSync(srcPath, finalCode, 'utf8');
 
       // Compile with GCC
       const compile = await runProcess('gcc', ['-O2', 'solution.c', '-o', 'solution.exe'], '', 8000, tmpDir);
@@ -191,8 +561,20 @@ async function executeCodeEngine(language, code, stdin = '') {
       if (classMatch && classMatch[1]) {
         className = classMatch[1];
       }
+      let finalCode = code;
+      if (!finalCode.includes('import java.util.')) {
+        finalCode = 'import java.util.*;\nimport java.io.*;\n' + finalCode;
+      }
+      if (!finalCode.includes('public static void main')) {
+        const lastBraceIdx = finalCode.lastIndexOf('}');
+        if (lastBraceIdx !== -1) {
+          const mainHarness = `\n    public static void main(String[] args) {\n    }\n`;
+          finalCode = finalCode.substring(0, lastBraceIdx) + mainHarness + finalCode.substring(lastBraceIdx);
+        }
+      }
+
       const srcPath = path.join(tmpDir, `${className}.java`);
-      fs.writeFileSync(srcPath, code, 'utf8');
+      fs.writeFileSync(srcPath, finalCode, 'utf8');
 
       const compile = await runProcess('javac', ['-encoding', 'UTF-8', `${className}.java`], '', 8000, tmpDir);
       if (compile.exitCode !== 0) {
@@ -222,9 +604,118 @@ async function executeCodeEngine(language, code, stdin = '') {
     }
 
     if (lang === 'javascript' || lang === 'js') {
+      let finalCode = code;
+      const hasTestCases = Array.isArray(testCases) && testCases.length > 0;
+
+      if (hasTestCases) {
+        const jsRunner = `
+${finalCode}
+
+const testCases = ${JSON.stringify(testCases)};
+for (let idx = 0; idx < testCases.length; idx++) {
+  const tc = testCases[idx];
+  console.log('---JUDGEX_TC_START:' + idx + '---');
+  try {
+    const fnNames = Object.keys(global).filter(k => typeof global[k] === 'function' && !['setTimeout', 'setInterval', 'setImmediate', 'clearTimeout', 'clearInterval', 'clearImmediate'].includes(k));
+    const targetFn = typeof isMatch === 'function' ? isMatch :
+                     typeof twoSum === 'function' ? twoSum :
+                     typeof isPalindrome === 'function' ? isPalindrome :
+                     typeof maxArea === 'function' ? maxArea :
+                     typeof lengthOfLongestSubstring === 'function' ? lengthOfLongestSubstring :
+                     typeof isValid === 'function' ? isValid :
+                     (fnNames.length > 0 ? global[fnNames[fnNames.length - 1]] : null);
+    
+    // Evaluate args
+    const parts = (tc.input || '').split(/,\\s*(?=[a-zA-Z_][a-zA-Z0-9_]*\\s*=)/);
+    const args = parts.map(p => {
+      const eq = p.indexOf('=');
+      const valStr = eq !== -1 ? p.substring(eq + 1).trim() : p.trim();
+      try { return eval('(' + valStr + ')'); } catch(e) { return valStr; }
+    });
+
+    const res = targetFn ? targetFn(...args) : '(no function found)';
+    const out = typeof res === 'boolean' ? (res ? 'true' : 'false') : (typeof res === 'object' ? JSON.stringify(res) : String(res));
+    console.log('OUTPUT:' + out);
+  } catch(e) {
+    console.log('ERROR:' + e.message);
+  }
+  console.log('---JUDGEX_TC_END:' + idx + '---');
+}
+`;
+        finalCode = jsRunner;
+      }
+
       const srcPath = path.join(tmpDir, 'solution.js');
-      fs.writeFileSync(srcPath, code, 'utf8');
+      fs.writeFileSync(srcPath, finalCode, 'utf8');
       const run = await runProcess('node', ['solution.js'], stdin, 6000, tmpDir);
+
+      if (hasTestCases && run.exitCode === 0) {
+        const testCaseResults = [];
+        let allPassed = true;
+        let firstFailed = null;
+        let passedCases = 0;
+
+        for (let idx = 0; idx < testCases.length; idx++) {
+          const tc = testCases[idx];
+          const tcRegex = new RegExp(`---JUDGEX_TC_START:${idx}---[\\r\\n]+([\\s\\S]*?)[\\r\\n]+---JUDGEX_TC_END:${idx}---`);
+          const tcMatch = run.stdout.match(tcRegex);
+          let actualVal = '';
+          let hasError = false;
+
+          if (tcMatch) {
+            const block = tcMatch[1].trim();
+            if (block.startsWith('OUTPUT:')) {
+              actualVal = block.substring(7).trim();
+            } else if (block.startsWith('ERROR:')) {
+              actualVal = block.substring(6).trim();
+              hasError = true;
+            } else {
+              actualVal = block;
+            }
+          } else {
+            actualVal = '(no output / exception)';
+            hasError = true;
+          }
+
+          const passed = !hasError && (normalizeJudgeOutput(actualVal) === normalizeJudgeOutput(tc.expected));
+          if (passed) passedCases++;
+          else {
+            allPassed = false;
+            if (!firstFailed) {
+              firstFailed = {
+                caseNum: idx + 1,
+                input: tc.input,
+                expected: tc.expected,
+                actual: actualVal
+              };
+            }
+          }
+
+          testCaseResults.push({
+            title: tc.title || `Test ${idx + 1}`,
+            input: tc.input,
+            expected: tc.expected,
+            actual: actualVal,
+            passed: passed
+          });
+        }
+
+        return {
+          success: allPassed,
+          status: allPassed ? 'ACCEPTED' : 'WRONG_ANSWER',
+          stdout: testCaseResults.map((r, i) => `Test ${i + 1}: ${r.passed ? 'PASSED' : 'FAILED'}`).join('\n'),
+          stderr: allPassed ? '' : (firstFailed ? `Test Case ${firstFailed.caseNum} Failed: Expected ${firstFailed.expected}, but got ${firstFailed.actual}` : ''),
+          runtimeMs: run.duration,
+          memoryMb: memMb,
+          compiler: 'Node.js (V8 Engine)',
+          exitCode: allPassed ? 0 : 1,
+          passedCases: passedCases,
+          totalCases: testCases.length,
+          firstFailed: firstFailed,
+          testCaseResults: testCaseResults
+        };
+      }
+
       return {
         success: run.exitCode === 0,
         status: run.timedOut ? 'TIME_LIMIT_EXCEEDED' : run.exitCode === 0 ? 'ACCEPTED' : 'RUNTIME_ERROR',
@@ -353,6 +844,7 @@ const server = http.createServer(async (req, res) => {
         language,
         code,
         stdin,
+        testCases,
         isSubmission,
         studentName,
         studentRoll,
@@ -366,10 +858,10 @@ const server = http.createServer(async (req, res) => {
       }
 
       // Execute code via sandboxed compiler engine
-      const result = await executeCodeEngine(language, code, stdin);
+      const result = await executeCodeEngine(language, code, stdin, testCases, problemKey, problemTitle);
 
-      // Save submission permanently in MongoDB if isSubmission is true
-      if (isSubmission === true) {
+      // Save submission permanently in MongoDB only if isSubmission is true and code was implemented
+      if (isSubmission === true && result.status !== 'NOT_IMPLEMENTED') {
         try {
           const subDoc = await db.saveSubmission({
             studentName: studentName || 'Student Coder',

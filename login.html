@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=11">
-  <link rel="stylesheet" href="/login.css?v=8">
+  <link rel="stylesheet" href="/style.css?v=13">
+  <link rel="stylesheet" href="/login.css?v=10">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
   <!-- Official Google Identity Services SDK for Real Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -396,6 +396,11 @@
             <span class="subnav-icon">🏆</span>
             <span>Registered Contests</span>
           </button>
+          <button type="button" class="student-subnav-btn" id="subnav-btn-problems" onclick="window.openProblemSearchModal()" title="Search LeetCode Practice Questions">
+            <span class="subnav-icon">🔍</span>
+            <span>LeetCode Bank</span>
+            <span class="student-subnav-badge" id="student-nav-lc-count">30+</span>
+          </button>
         </div>
 
         <!-- SECTION 1: DASHBOARD OVERVIEW -->
@@ -731,12 +736,35 @@
           <!-- IDE Top Toolbar -->
           <div class="ide-toolbar">
             <div class="ide-problem-selector-group">
-              <label for="problem-select" class="ide-label">CHALLENGE:</label>
-              <select id="problem-select" class="ide-select">
+              <label class="ide-label">CHALLENGE:</label>
+
+              <!-- Search Button with Magnifying Glass Icon matching User Image -->
+              <button type="button" class="btn-problem-search-icon" id="btn-search-problems" onclick="window.openProblemSearchModal()" title="Search LeetCode Problems by ID or Title (Ctrl+K)">
+                <svg class="search-glass-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="10.5" cy="10.5" r="7"></circle>
+                  <line x1="15.8" y1="15.8" x2="21.5" y2="21.5"></line>
+                </svg>
+                <span class="sr-only">Search Problems</span>
+              </button>
+
+              <!-- Current Problem Pill / Selector (opens search on click) -->
+              <div class="ide-current-problem-pill" id="current-problem-pill" onclick="window.openProblemSearchModal()" title="Click to browse LeetCode dataset (Ctrl+K)">
+                <span class="prob-pill-id" id="prob-pill-id">#1</span>
+                <span class="prob-pill-title" id="prob-pill-title">Two Sum</span>
+                <span class="difficulty-badge badge-easy prob-pill-diff" id="prob-pill-diff">EASY</span>
+                <span class="prob-pill-shortcut" title="Press Ctrl+K to search">⌘K</span>
+              </div>
+
+              <!-- Quick Next / Previous / Random Navigation -->
+              <div class="problem-quick-nav">
+                <button type="button" class="btn-quick-nav" id="btn-prev-problem" onclick="window.navigateAdjacentProblem(-1)" title="Previous LeetCode Problem (Shift+Left)">◀</button>
+                <button type="button" class="btn-quick-nav" id="btn-next-problem" onclick="window.navigateAdjacentProblem(1)" title="Next LeetCode Problem (Shift+Right)">▶</button>
+                <button type="button" class="btn-quick-nav btn-random-prob" id="btn-random-problem" onclick="window.pickRandomProblem()" title="Practice Random LeetCode Question">🎲</button>
+              </div>
+
+              <!-- Hidden native select retained for backward compatibility -->
+              <select id="problem-select" class="ide-select hidden-select" style="display:none;" aria-hidden="true" tabindex="-1">
                 <option value="two-sum">001. Two Sum (Easy)</option>
-                <option value="longest-substring">003. Longest Substring Without Repeating (Med)</option>
-                <option value="valid-parens">020. Valid Parentheses (Easy)</option>
-                <option value="median-arrays">004. Median of Two Sorted Arrays (Hard)</option>
               </select>
             </div>
 
@@ -752,13 +780,13 @@
             </div>
 
             <div class="ide-actions-group">
-              <button id="reset-code-btn" class="ide-btn-secondary" title="Reset starter code">
+              <button type="button" id="reset-code-btn" class="ide-btn-secondary" title="Reset starter code" tabindex="-1">
                 <span>Reset Code</span>
               </button>
-              <button id="run-code-btn" class="ide-btn-run" title="Run code">
+              <button type="button" id="run-code-btn" class="ide-btn-run" title="Run code" tabindex="-1">
                 <span>▶ Run Code</span>
               </button>
-              <button id="submit-code-btn" class="ide-btn-submit" title="Evaluate all testcases">
+              <button type="button" id="submit-code-btn" class="ide-btn-submit" title="Evaluate all testcases" tabindex="-1">
                 <span class="submit-glow"></span>
                 <span>⚡ Submit Code</span>
               </button>
@@ -1241,6 +1269,77 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
     </div>
   </div>
 
+  <!-- LEETCODE PROBLEM SEARCH & NAVIGATOR MODAL -->
+  <div class="google-modal-overlay hidden" id="problem-search-modal">
+    <div class="google-modal-card problem-search-modal-card">
+      <!-- Modal Header -->
+      <div class="google-modal-header search-modal-header">
+        <div class="search-modal-brand-group">
+          <div class="lc-brand-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div>
+            <h3 class="google-modal-brand">LeetCode Practice Arena</h3>
+            <span class="admin-modal-badge text-cyan" id="search-modal-stats-pill">OFFICIAL LEETCODE PROBLEM IDS</span>
+          </div>
+        </div>
+        <div class="search-modal-header-actions">
+          <span class="esc-hint-badge">ESC to close</span>
+          <button type="button" class="google-modal-close" onclick="window.closeProblemSearchModal()" title="Close Search (Esc)">✕</button>
+        </div>
+      </div>
+
+      <!-- Search Input Box -->
+      <div class="problem-search-toolbar">
+        <div class="problem-search-input-box">
+          <svg class="modal-search-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="7"></circle>
+            <line x1="15.8" y1="15.8" x2="21.5" y2="21.5"></line>
+          </svg>
+          <input type="text" id="problem-search-query" class="problem-search-input" placeholder="Search by ID (e.g. 1, 20, 206), title (Two Sum), or topic..." autocomplete="off" spellcheck="false">
+          <button type="button" class="btn-clear-search hidden" id="btn-clear-problem-search" onclick="window.clearProblemSearch()" title="Clear query">✕</button>
+        </div>
+      </div>
+
+      <!-- Filter Controls: Difficulty & Category -->
+      <div class="problem-filter-bar">
+        <div class="diff-filter-chips" id="search-diff-chips">
+          <button type="button" class="prob-chip active" data-diff="ALL" onclick="window.setProblemDiffFilter('ALL', this)">All</button>
+          <button type="button" class="prob-chip chip-easy" data-diff="EASY" onclick="window.setProblemDiffFilter('EASY', this)">Easy</button>
+          <button type="button" class="prob-chip chip-med" data-diff="MEDIUM" onclick="window.setProblemDiffFilter('MEDIUM', this)">Medium</button>
+          <button type="button" class="prob-chip chip-hard" data-diff="HARD" onclick="window.setProblemDiffFilter('HARD', this)">Hard</button>
+        </div>
+
+        <div class="category-filter-select-wrapper">
+          <label for="search-category-select" class="cat-label">TOPIC:</label>
+          <select id="search-category-select" class="cat-select" onchange="window.setProblemCategoryFilter(this.value)">
+            <option value="ALL">All Topics</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Results Problem List Table / Cards -->
+      <div class="problem-results-container" id="problem-results-container">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="problem-search-modal-footer">
+        <div class="search-footer-left">
+          <span class="search-footer-count" id="search-results-count">Loading LeetCode problem bank...</span>
+        </div>
+        <div class="search-footer-right">
+          <button type="button" class="btn-footer-random" onclick="window.pickRandomProblem()">
+            <span>🎲 Random Challenge</span>
+          </button>
+          <button type="button" class="btn-clear-client-id" onclick="window.closeProblemSearchModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- FLOATING JUDGEX TOAST NOTIFICATION -->
   <div class="judge-toast hidden" id="judge-toast">
     <span class="toast-icon" id="judge-toast-icon">⚡</span>
@@ -1248,6 +1347,7 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-  <script src="/login.js?v=12"></script>
+  <script src="/leetcode-dataset.js?v=4"></script>
+  <script src="/login.js?v=25"></script>
 </body>
 </html>

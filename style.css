@@ -77,6 +77,46 @@ body {
 }
 
 /* ==========================================================================
+   MODERN CYBERPUNK SCROLLBARS (Prevents clunky OS scrollbars & overlaps)
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #080a12 !important;
+  border-radius: 9999px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-radius: 9999px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00d6ff !important;
+  box-shadow: 0 0 10px rgba(0, 214, 255, 0.5) !important;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 214, 255, 0.3) #080a12;
+  }
+}
+
+/* ==========================================================================
    PRELOADER
    ========================================================================== */
 .preloader {
@@ -1364,16 +1404,46 @@ select option:checked {
 .ide-grid {
   display: grid;
   grid-template-columns: 1fr 1.35fr;
+  gap: 16px;
   min-height: 580px;
+  padding: 16px;
+  background: #05060a;
 }
 
 /* Problem Pane */
 .ide-problem-pane {
-  padding: 28px;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(8, 8, 12, 0.5);
+  padding: 24px 20px 24px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(10, 12, 18, 0.7);
   overflow-y: auto;
   max-height: 640px;
+}
+
+.ide-problem-pane::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.ide-problem-pane::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.ide-problem-pane::-webkit-scrollbar-track {
+  background: rgba(6, 8, 16, 0.7) !important;
+  border-radius: 4px !important;
+  margin: 6px 0 !important;
+}
+
+.ide-problem-pane::-webkit-scrollbar-thumb {
+  background: rgba(0, 214, 255, 0.35) !important;
+  border-radius: 4px !important;
+}
+
+.ide-problem-pane::-webkit-scrollbar-thumb:hover {
+  background: #00d6ff !important;
+  box-shadow: 0 0 8px rgba(0, 214, 255, 0.6) !important;
 }
 
 .pane-header {
@@ -1467,6 +1537,10 @@ select option:checked {
   display: flex;
   flex-direction: column;
   background: var(--bg-editor);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
 }
 
 .editor-header {
@@ -1580,12 +1654,17 @@ select option:checked {
   background: #07080d;
   position: relative;
   overflow: hidden;
+  padding-left: 12px;
+  border-left: 2px solid rgba(0, 214, 255, 0.12);
 }
 
 .monaco-editor-mount {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  right: 0;
+  width: calc(100% - 12px);
   height: 100%;
   min-height: 420px;
   display: none;
@@ -1832,6 +1911,13 @@ select option:checked {
   background: rgba(16, 185, 129, 0.15);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.testcase-badge.failed,
+.testcase-badge.wrong {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .testcase-badge.pending {

@@ -360,115 +360,35 @@
       templates: {
         python: `class Solution:
     def twoSum(self, nums: list[int], target: int) -> list[int]:
-        lookup = {}
-        for i, num in enumerate(nums):
-            diff = target - num
-            if diff in lookup:
-                return [lookup[diff], i]
-            lookup[num] = i
-        return []
-
-# Driver
-if __name__ == '__main__':
-    sol = Solution()
-    print("Test 1:", sol.twoSum([2, 7, 11, 15], 9)) # [0, 1]
-    print("Test 2:", sol.twoSum([3, 2, 4], 6))       # [1, 2]
-    print("Test 3:", sol.twoSum([3, 3], 6))          # [0, 1]
+        
 `,
-        cpp: `#include <iostream>
-#include <vector>
-#include <unordered_map>
-
-using namespace std;
-
-class Solution {
+        cpp: `class Solution {
 public:
     vector<int> twoSum(vector<int>& nums, int target) {
-        unordered_map<int, int> seen;
-        for (int i = 0; i < nums.size(); i++) {
-            int complement = target - nums[i];
-            if (seen.find(complement) != seen.end()) {
-                return {seen[complement], i};
-            }
-            seen[nums[i]] = i;
-        }
-        return {};
+        
     }
 };
-
-int main() {
-    Solution sol;
-    vector<int> n1 = {2, 7, 11, 15};
-    vector<int> r1 = sol.twoSum(n1, 9);
-    cout << "Test 1: [" << r1[0] << ", " << r1[1] << "]" << endl;
-    return 0;
-}
 `,
-        javascript: `function twoSum(nums, target) {
-    const map = new Map();
-    for (let i = 0; i < nums.length; i++) {
-        const diff = target - nums[i];
-        if (map.has(diff)) {
-            return [map.get(diff), i];
-        }
-        map.set(nums[i], i);
-    }
-    return [];
-}
-
-console.log("Test 1:", twoSum([2, 7, 11, 15], 9)); // [0, 1]
-console.log("Test 2:", twoSum([3, 2, 4], 6));       // [1, 2]
-console.log("Test 3:", twoSum([3, 3], 6));          // [0, 1]
+        javascript: `/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number[]}
+ */
+var twoSum = function(nums, target) {
+    
+};
 `,
-        java: `import java.util.*;
-
-public class Solution {
+        java: `class Solution {
     public int[] twoSum(int[] nums, int target) {
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) {
-            int complement = target - nums[i];
-            if (map.containsKey(complement)) {
-                return new int[] { map.get(complement), i };
-            }
-            map.put(nums[i], i);
-        }
-        return new int[] {};
-    }
-
-    public static void main(String[] args) {
-        Solution sol = new Solution();
-        int[] res1 = sol.twoSum(new int[]{2, 7, 11, 15}, 9);
-        System.out.println("Test 1: " + Arrays.toString(res1)); // [0, 1]
-        int[] res2 = sol.twoSum(new int[]{3, 2, 4}, 6);
-        System.out.println("Test 2: " + Arrays.toString(res2)); // [1, 2]
+        
     }
 }
 `,
-        c: `#include <stdio.h>
-#include <stdlib.h>
-
+        c: `/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
 int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
-    *returnSize = 2;
-    int* result = (int*)malloc(2 * sizeof(int));
-    for (int i = 0; i < numsSize; i++) {
-        for (int j = i + 1; j < numsSize; j++) {
-            if (nums[i] + nums[j] == target) {
-                result[0] = i;
-                result[1] = j;
-                return result;
-            }
-        }
-    }
-    return result;
-}
-
-int main() {
-    int nums1[] = {2, 7, 11, 15};
-    int retSize;
-    int* res1 = twoSum(nums1, 4, 9, &retSize);
-    printf("Test 1: [%d, %d]\n", res1[0], res1[1]);
-    free(res1);
-    return 0;
+    
 }
 `
       }
@@ -489,113 +409,31 @@ int main() {
       templates: {
         python: `class Solution:
     def lengthOfLongestSubstring(self, s: str) -> int:
-        char_map = {}
-        left = 0
-        max_len = 0
-        for right, char in enumerate(s):
-            if char in char_map and char_map[char] >= left:
-                left = char_map[char] + 1
-            char_map[char] = right
-            max_len = max(max_len, right - left + 1)
-        return max_len
-
-if __name__ == '__main__':
-    sol = Solution()
-    print("Test 1:", sol.lengthOfLongestSubstring("abcabcbb")) # 3
-    print("Test 2:", sol.lengthOfLongestSubstring("bbbbb"))    # 1
+        
 `,
-        cpp: `#include <iostream>
-#include <string>
-#include <vector>
-#include <algorithm>
-
-using namespace std;
-
-class Solution {
+        cpp: `class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
-        vector<int> lastIndex(256, -1);
-        int maxLen = 0, start = -1;
-        for (int i = 0; i < s.length(); i++) {
-            if (lastIndex[s[i]] > start)
-                start = lastIndex[s[i]];
-            lastIndex[s[i]] = i;
-            maxLen = max(maxLen, i - start);
-        }
-        return maxLen;
+        
     }
 };
-
-int main() {
-    Solution sol;
-    cout << "Test 1: " << sol.lengthOfLongestSubstring("abcabcbb") << endl;
-    return 0;
-}
 `,
-        javascript: `function lengthOfLongestSubstring(s) {
-    let map = new Map();
-    let left = 0;
-    let maxLen = 0;
-    for (let right = 0; right < s.length; right++) {
-        if (map.has(s[right]) && map.get(s[right]) >= left) {
-            left = map.get(s[right]) + 1;
-        }
-        map.set(s[right], right);
-        maxLen = Math.max(maxLen, right - left + 1);
-    }
-    return maxLen;
-}
-
-console.log("Test 1:", lengthOfLongestSubstring("abcabcbb")); // 3
-console.log("Test 2:", lengthOfLongestSubstring("pwwkew"));   // 3
+        javascript: `/**
+ * @param {string} s
+ * @return {number}
+ */
+var lengthOfLongestSubstring = function(s) {
+    
+};
 `,
-        java: `import java.util.*;
-
-public class Solution {
+        java: `class Solution {
     public int lengthOfLongestSubstring(String s) {
-        int[] lastIndex = new int[256];
-        Arrays.fill(lastIndex, -1);
-        int maxLen = 0, start = 0;
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            start = Math.max(start, lastIndex[c] + 1);
-            maxLen = Math.max(maxLen, i - start + 1);
-            lastIndex[c] = i;
-        }
-        return maxLen;
-    }
-
-    public static void main(String[] args) {
-        Solution sol = new Solution();
-        System.out.println("Test 1: " + sol.lengthOfLongestSubstring("abcabcbb")); // 3
-        System.out.println("Test 2: " + sol.lengthOfLongestSubstring("bbbbb"));    // 1
+        
     }
 }
 `,
-        c: `#include <stdio.h>
-#include <string.h>
-
-int lengthOfLongestSubstring(char* s) {
-    int lastIndex[256];
-    for (int i = 0; i < 256; i++) lastIndex[i] = -1;
-    int maxLen = 0, start = 0;
-    int len = strlen(s);
-    for (int i = 0; i < len; i++) {
-        unsigned char c = (unsigned char)s[i];
-        if (lastIndex[c] >= start) {
-            start = lastIndex[c] + 1;
-        }
-        int curLen = i - start + 1;
-        if (curLen > maxLen) maxLen = curLen;
-        lastIndex[c] = i;
-    }
-    return maxLen;
-}
-
-int main() {
-    printf("Test 1: %d\n", lengthOfLongestSubstring("abcabcbb")); // 3
-    printf("Test 2: %d\n", lengthOfLongestSubstring("pwwkew"));   // 3
-    return 0;
+        c: `int lengthOfLongestSubstring(char* s) {
+    
 }
 `
       }
@@ -616,121 +454,31 @@ int main() {
       templates: {
         python: `class Solution:
     def isValid(self, s: str) -> bool:
-        stack = []
-        mapping = {')': '(', '}': '{', ']': '['}
-        for char in s:
-            if char in mapping:
-                top = stack.pop() if stack else '#'
-                if mapping[char] != top:
-                    return False
-            else:
-                stack.append(char)
-        return not stack
-
-if __name__ == '__main__':
-    sol = Solution()
-    print("Test 1:", sol.isValid("()[]{}")) # True
-    print("Test 2:", sol.isValid("(]"))     # False
+        
 `,
-        cpp: `#include <iostream>
-#include <stack>
-#include <string>
-
-using namespace std;
-
-class Solution {
+        cpp: `class Solution {
 public:
     bool isValid(string s) {
-        stack<char> st;
-        for (char c : s) {
-            if (c == '(' || c == '{' || c == '[') st.push(c);
-            else {
-                if (st.empty()) return false;
-                if (c == ')' && st.top() != '(') return false;
-                if (c == '}' && st.top() != '{') return false;
-                if (c == ']' && st.top() != '[') return false;
-                st.pop();
-            }
-        }
-        return st.empty();
+        
     }
 };
-
-int main() {
-    Solution sol;
-    cout << "Test: " << boolalpha << sol.isValid("()[]{}") << endl;
-    return 0;
-}
 `,
-        javascript: `function isValid(s) {
-    const stack = [];
-    const map = { ')': '(', '}': '{', ']': '[' };
-    for (let char of s) {
-        if (map[char]) {
-            if (stack.pop() !== map[char]) return false;
-        } else {
-            stack.push(char);
-        }
-    }
-    return stack.length === 0;
-}
-
-console.log("Test 1:", isValid("()[]{}")); // true
-console.log("Test 2:", isValid("(]"));     // false
+        javascript: `/**
+ * @param {string} s
+ * @return {boolean}
+ */
+var isValid = function(s) {
+    
+};
 `,
-        java: `import java.util.*;
-
-public class Solution {
+        java: `class Solution {
     public boolean isValid(String s) {
-        Stack<Character> stack = new Stack<>();
-        for (char c : s.toCharArray()) {
-            if (c == '(' || c == '{' || c == '[') {
-                stack.push(c);
-            } else {
-                if (stack.isEmpty()) return false;
-                char top = stack.pop();
-                if (c == ')' && top != '(') return false;
-                if (c == '}' && top != '{') return false;
-                if (c == ']' && top != '[') return false;
-            }
-        }
-        return stack.isEmpty();
-    }
-
-    public static void main(String[] args) {
-        Solution sol = new Solution();
-        System.out.println("Test 1: " + sol.isValid("()[]{}")); // true
-        System.out.println("Test 2: " + sol.isValid("(]"));     // false
+        
     }
 }
 `,
-        c: `#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-
-bool isValid(char* s) {
-    int len = strlen(s);
-    char stack[10005];
-    int top = -1;
-    for (int i = 0; i < len; i++) {
-        char c = s[i];
-        if (c == '(' || c == '{' || c == '[') {
-            stack[++top] = c;
-        } else {
-            if (top < 0) return false;
-            char prev = stack[top--];
-            if (c == ')' && prev != '(') return false;
-            if (c == '}' && prev != '{') return false;
-            if (c == ']' && prev != '[') return false;
-        }
-    }
-    return top == -1;
-}
-
-int main() {
-    printf("Test 1: %s\n", isValid("()[]{}") ? "true" : "false"); // true
-    printf("Test 2: %s\n", isValid("(]") ? "true" : "false");     // false
-    return 0;
+        c: `bool isValid(char* s) {
+    
 }
 `
       }
@@ -753,100 +501,32 @@ int main() {
       templates: {
         python: `class Solution:
     def findMedianSortedArrays(self, nums1: list[int], nums2: list[int]) -> float:
-        merged = sorted(nums1 + nums2)
-        n = len(merged)
-        if n % 2 == 1:
-            return float(merged[n // 2])
-        return (merged[n // 2 - 1] + merged[n // 2]) / 2.0
-
-if __name__ == '__main__':
-    sol = Solution()
-    print("Median:", sol.findMedianSortedArrays([1, 3], [2])) # 2.0
+        
 `,
-        cpp: `#include <iostream>
-#include <vector>
-#include <algorithm>
-
-using namespace std;
-
-class Solution {
+        cpp: `class Solution {
 public:
     double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
-        vector<int> m = nums1;
-        m.insert(m.end(), nums2.begin(), nums2.end());
-        sort(m.begin(), m.end());
-        int n = m.size();
-        if (n % 2 == 1) return m[n / 2];
-        return (m[n / 2 - 1] + m[n / 2]) / 2.0;
+        
     }
 };
-
-int main() {
-    Solution sol;
-    vector<int> n1 = {1, 3}, n2 = {2};
-    cout << "Median: " << sol.findMedianSortedArrays(n1, n2) << endl;
-    return 0;
-}
 `,
-        javascript: `function findMedianSortedArrays(nums1, nums2) {
-    const merged = [...nums1, ...nums2].sort((a, b) => a - b);
-    const mid = Math.floor(merged.length / 2);
-    if (merged.length % 2 === 1) return merged[mid];
-    return (merged[mid - 1] + merged[mid]) / 2;
-}
-
-console.log("Median:", findMedianSortedArrays([1, 3], [2])); // 2
+        javascript: `/**
+ * @param {number[]} nums1
+ * @param {number[]} nums2
+ * @return {number}
+ */
+var findMedianSortedArrays = function(nums1, nums2) {
+    
+};
 `,
-        java: `import java.util.*;
-
-public class Solution {
+        java: `class Solution {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        int m = nums1.length, n = nums2.length;
-        int[] merged = new int[m + n];
-        System.arraycopy(nums1, 0, merged, 0, m);
-        System.arraycopy(nums2, 0, merged, m, n);
-        Arrays.sort(merged);
-        int total = m + n;
-        if (total % 2 == 1) {
-            return (double) merged[total / 2];
-        }
-        return (merged[total / 2 - 1] + merged[total / 2]) / 2.0;
-    }
-
-    public static void main(String[] args) {
-        Solution sol = new Solution();
-        System.out.println("Median: " + sol.findMedianSortedArrays(new int[]{1, 3}, new int[]{2})); // 2.0
+        
     }
 }
 `,
-        c: `#include <stdio.h>
-#include <stdlib.h>
-
-int compareInts(const void* a, const void* b) {
-    return (*(int*)a - *(int*)b);
-}
-
-double findMedianSortedArrays(int* nums1, int nums1Size, int* nums2, int nums2Size) {
-    int total = nums1Size + nums2Size;
-    int* merged = (int*)malloc(total * sizeof(int));
-    for (int i = 0; i < nums1Size; i++) merged[i] = nums1[i];
-    for (int i = 0; i < nums2Size; i++) merged[nums1Size + i] = nums2[i];
-    qsort(merged, total, sizeof(int), compareInts);
-    double median;
-    if (total % 2 == 1) {
-        median = merged[total / 2];
-    } else {
-        median = (merged[total / 2 - 1] + merged[total / 2]) / 2.0;
-    }
-    free(merged);
-    return median;
-}
-
-int main() {
-    int n1[] = {1, 3};
-    int n2[] = {2};
-    printf("Median: %.5f\n", findMedianSortedArrays(n1, 2, n2, 1)); // 2.00000
-    return 0;
+        c: `double findMedianSortedArrays(int* nums1, int nums1Size, int* nums2, int nums2Size) {
+    
 }
 `
       }
